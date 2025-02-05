@@ -64,7 +64,9 @@ export default function PlantillaDetalle() {
       <p className="text-sm text-gray-600 flex items-center gap-2 mt-2">
         <span className="text-gray-800">📍</span>
         Calle San Isidro número 32 Casa rural, 16120 Valera de Abajo, España
-        <span className="text-gray-800 cursor-pointer"> - Ubicación excelente - Ver mapa</span>
+        <span className="text-gray-800 cursor-pointer">
+          {" - Ubicaci&oacute;n excelente - Ver mapa"}
+        </span>
       </p>
 
       <div className="grid md:grid-cols-3 gap-4 mt-4">
@@ -97,11 +99,11 @@ export default function PlantillaDetalle() {
             <p className="text-xl font-bold text-gray-800 mt-2">9,8</p>
             <h2 className="text-base font-semibold mt-4">Puntos fuertes del alojamiento</h2>
             <p className="text-sm text-gray-800">
-              ¡Ideal para estancias de 2 noches! Este hotel está en el corazón de Cracovia y tiene una puntuación excelente en ubicación: 9,5
+              &iexcl;Ideal para estancias de 2 noches! Este hotel est&aacute; en el coraz&oacute;n de Cracovia y tiene una puntuaci&oacute;n excelente en ubicaci&oacute;n: 9,5
             </p>
-            <h2 className="text-base font-semibold mt-4">Información sobre el desayuno</h2>
+            <h2 className="text-base font-semibold mt-4">Informaci&oacute;n sobre el desayuno</h2>
             <p className="text-sm text-gray-800">
-              ¡Ideal para estancias de 2 noches! Continental, Vegetariano, Vegano, Sin gluten, Buffet
+              &iexcl;Ideal para estancias de 2 noches! Continental, Vegetariano, Vegano, Sin gluten, Buffet
             </p>
             <h2 className="text-base font-semibold mt-4">Habitaciones con:</h2>
             <p className="text-sm text-gray-800">Terraza</p>
@@ -120,40 +122,40 @@ export default function PlantillaDetalle() {
       <div className="mt-6 grid md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
           <div className="bg-white p-4 shadow-md rounded-lg">
-            <h2 className="text-lg font-bold text-gray-800 mt-4">Fantástico</h2>
+            <h2 className="text-lg font-bold text-gray-800 mt-4">Fant&aacute;stico</h2>
             <p className="text-2xl font-bold text-gray-800 mt-2">9,4</p>
             <p className="text-sm text-gray-600 italic mt-2">
-              "Tiene unos exteriores maravillosos y que la barbacoa esté en una cabaña aparte está genial. La mesa del salón es amplia, cupimos todos sin problema."
+              &quot;Tiene unos exteriores maravillosos y que la barbacoa est&eacute; en una caba&ntilde;a aparte est&aacute; genial. La mesa del sal&oacute;n es amplia, cupimos todos sin problema.&quot;
             </p>
-            <p className="mt-2 font-semibold text-sm">- Irene, España</p>
+            <p className="mt-2 font-semibold text-sm">&ndash; Irene, Espa&ntilde;a</p>
           </div>
         </div>
       </div>
 
-      {/* Sección de Servicios más populares */}
+      {/* Secci&oacute;n de Servicios m&aacute;s populares */}
       <div className="w-full mt-8 p-4 bg-gray-100 rounded-lg">
         <p className="text-sm text-gray-800 mb-4">
-          Es posible que tengas descuento Genius en Hotel Golden Queen. Para saber si se aplica el descuento Genius en tus fechas, inicia sesión.
+          Es posible que tengas descuento Genius en Hotel Golden Queen. Para saber si se aplica el descuento Genius en tus fechas, inicia sesi&oacute;n.
           <br />
           Los descuentos Genius en este alojamiento dependen de las fechas de reserva, las fechas de estancia y otras ofertas disponibles.
           <br />
-          Info fiable: Los clientes dicen que la descripción y las fotos de este alojamiento son muy precisas.
+          Info fiable: Los clientes dicen que la descripci&oacute;n y las fotos de este alojamiento son muy precisas.
           <br />
-          Hotel Golden Queen es un alojamiento con una ubicación excelente en el centro de Cracovia, a 9 min a pie de Torre del Ayuntamiento y a 800 metros de Plaza del Mercado. Se ofrece parking privado por un suplemento. El alojamiento ofrece recepción 24 horas, traslado para ir o volver del aeropuerto, servicio de habitaciones y wifi gratis en todo el alojamiento.
+          Hotel Golden Queen es un alojamiento con una ubicaci&oacute;n excelente en el centro de Cracovia, a 9 min a pie de Torre del Ayuntamiento y a 800 metros de Plaza del Mercado. Se ofrece parking privado por un suplemento. El alojamiento ofrece recepci&oacute;n 24 horas, traslado para ir o volver del aeropuerto, servicio de habitaciones y wifi gratis en todo el alojamiento.
           <br />
-          En el hotel, todas las habitaciones tienen aire acondicionado, zona de estar, TV de pantalla plana con canales vía satélite, caja fuerte y baño privado con ducha, artículos de aseo gratuitos y secador de pelo. Hotel Golden Queen dispone de algunas unidades con vistas a la ciudad, y todas tienen hervidor. En el alojamiento, cada habitación dispone de ropa de cama y toallas.
+          En el hotel, todas las habitaciones tienen aire acondicionado, zona de estar, TV de pantalla plana con canales v&iacute;a sat&eacute;lite, caja fuerte y ba&ntilde;o privado con ducha, art&iacute;culos de aseo gratuitos y secador de pelo.
           <br />
-          El desayuno está disponible e incluye opciones buffet, continentales o vegetarianas.
+          El desayuno est&aacute; disponible e incluye opciones buffet, continentales o vegetarianas.
           <br />
           Hotel Golden Queen ofrece alojamiento de 4 estrellas con sauna y terraza.
           <br />
-          Cerca del alojamiento hay puntos de interés como Lonja de los Paños, Stadion Miejski Cracovii y Museo Nacional de Cracovia. El aeropuerto (Aeropuerto Internacional Juan Pablo II de Cracovia-Balice) está a 15 km.
+          Cerca del alojamiento hay puntos de inter&eacute;s como Lonja de los Pa&ntilde;os, Stadion Miejski Cracovii y Museo Nacional de Cracovia. El aeropuerto (Aeropuerto Internacional Juan Pablo II de Cracovia-Balice) est&aacute; a 15 km.
           <br />
-          A las parejas les encanta la ubicación — Le han puesto un 9,6 para viajes de dos personas.
+          A las parejas les encanta la ubicaci&oacute;n &mdash; Le han puesto un 9,6 para viajes de dos personas.
           <br />
-          Las distancias en la descripción del alojamiento se calculan con OpenStreetMap©
+          Las distancias en la descripci&oacute;n del alojamiento se calculan con OpenStreetMap&copy;
         </p>
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Servicios más populares</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4">Servicios m&aacute;s populares</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="flex items-center gap-2">
             <Ban size={16} className="text-gray-800" />
@@ -193,7 +195,7 @@ export default function PlantillaDetalle() {
           </div>
           <div className="flex items-center gap-2">
             <Moon size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">Cuna gratis disponible bajo petición</span>
+            <span className="text-sm text-gray-800">Cuna gratis disponible bajo petici&oacute;n</span>
           </div>
         </div>
       </div>
