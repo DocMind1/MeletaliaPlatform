@@ -12,8 +12,8 @@ const Header: React.FC = () => {
         <Image 
   src="/images/logo.png" 
   alt="Logo" 
-  width={32} 
-  height={32} 
+  width={42} 
+  height={42} 
   className="object-contain" 
 />
 
