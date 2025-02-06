@@ -9,14 +9,15 @@ const Header: React.FC = () => {
       <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-6 py-4">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold flex items-center gap-2 mb-4 sm:mb-0">
-          <Image 
-            src="/logo.png" 
-            alt="Logo" 
-            width={32} 
-            height={32} 
-            className="object-contain" 
-          />
-          <span className="text-white">Maletalia</span>
+        <Image 
+  src="/images/logo.png" 
+  alt="Logo" 
+  width={32} 
+  height={32} 
+  className="object-contain" 
+/>
+
+          <span className="text-white">Maletalia </span>
           <span className="text-blue-300">.com</span>
         </Link>
         
