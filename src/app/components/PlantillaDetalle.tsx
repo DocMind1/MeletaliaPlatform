@@ -124,15 +124,15 @@ export default function PlantillaDetalle() {
             <p className="mt-2 font-semibold text-sm">&ndash; Irene, Espa&ntilde;a</p>
           </div>
         </div>
-        {/* Contenedor para el mapa */}
-        <div className="hidden md:block">
+        {/* Contenedor para el mapa, siempre visible */}
+        <div>
           <div className="bg-white p-4 shadow-md rounded-lg h-full">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3111.6372734765924!2d-3.7037902846553216!3d40.41677597936501!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd42288f3c521d1f%3A0x4d4c4efb939fc8!2sCalle%20San%20Isidro%2032!5e0!3m2!1ses!2ses!4v1617195034820!5m2!1ses!2ses"
               width="100%"
               height="300"
               style={{ border: 0 }}
-              allowFullScreen
+              allowFullScreen={true}
               loading="lazy"
               className="rounded-lg"
             ></iframe>
@@ -256,7 +256,7 @@ export default function PlantillaDetalle() {
                 onClick={handleConfirmDates}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                Confirmar ::
+                Confirmar
               </button>
             </div>
           </div>
