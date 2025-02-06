@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Meletalia",
+  title: "Maletalia",
   description: "Casas y alojamientos rurales ",
 };
 
