@@ -1,14 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { 
-  FaMapMarkerAlt, 
-  FaDollarSign, 
-  FaHome, 
-  FaBed, 
-  FaBath, 
-  FaToggleOn, 
-  FaToggleOff 
-} from "react-icons/fa";
+import { FaMapMarkerAlt, FaDollarSign, FaHome, FaBed, FaBath, FaToggleOn, FaToggleOff } from "react-icons/fa";
 
 const FiltroBusquedaLinea: React.FC = () => {
   const [location, setLocation] = useState("");
@@ -51,9 +43,7 @@ const FiltroBusquedaLinea: React.FC = () => {
           type="number"
           placeholder="Min"
           value={minPrice}
-          onChange={(e) =>
-            setMinPrice(e.target.value ? Number(e.target.value) : "")
-          }
+          onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : "")}
           className="w-16 outline-none p-1 border-b border-gray-300 focus:border-blue-600"
         />
         <span className="text-gray-600">-</span>
@@ -61,9 +51,7 @@ const FiltroBusquedaLinea: React.FC = () => {
           type="number"
           placeholder="Max"
           value={maxPrice}
-          onChange={(e) =>
-            setMaxPrice(e.target.value ? Number(e.target.value) : "")
-          }
+          onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : "")}
           className="w-16 outline-none p-1 border-b border-gray-300 focus:border-blue-600"
         />
       </div>
@@ -91,9 +79,7 @@ const FiltroBusquedaLinea: React.FC = () => {
           className="outline-none p-1 border-b border-gray-300 focus:border-blue-600"
         >
           {[...Array(10).keys()].map((n) => (
-            <option key={n} value={n + 1}>
-              {n + 1}
-            </option>
+            <option key={n} value={n + 1}>{n + 1}</option>
           ))}
         </select>
       </div>
@@ -106,9 +92,7 @@ const FiltroBusquedaLinea: React.FC = () => {
           className="outline-none p-1 border-b border-gray-300 focus:border-blue-600"
         >
           {[...Array(10).keys()].map((n) => (
-            <option key={n} value={n + 1}>
-              {n + 1}
-            </option>
+            <option key={n} value={n + 1}>{n + 1}</option>
           ))}
         </select>
       </div>
@@ -130,7 +114,7 @@ const FiltroBusquedaLinea: React.FC = () => {
       {/* Botón Filtrar */}
       <button
         onClick={handleFilter}
-        className="bg-white text-blue-900 px-4 py-2 rounded-md shadow-md hover:shadow-xl transition"
+        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
       >
         Filtrar
       </button>

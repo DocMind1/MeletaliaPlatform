@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
 // Se ha eliminado el import de FiltroBusqueda ya que no se utiliza
 
 export interface HotelCardProps {
@@ -13,15 +12,10 @@ export interface HotelCardProps {
   price: number;
 }
 
-const HotelCard: React.FC<HotelCardProps> = ({
-  name,
-  location,
-  rating,
-  reviews,
-  price,
-}) => (
-  <>
-    <Image
+const HotelCard: React.FC<HotelCardProps> = ({ name, location, rating, reviews, price }) => (
+  <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    {/* Se reemplaza el campo gris por una imagen tomada de public/images/image2.jpg */}
+    <Image 
       src="/images/image2.jpg"
       alt={name}
       width={400}
@@ -41,7 +35,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
       </div>
       <p className="mt-2 text-lg font-semibold">Desde &euro; {price}</p>
     </div>
-  </>
+  </div>
 );
 
 const HotelCardList: React.FC<{ hotels?: HotelCardProps[] }> = ({ hotels }) => {
@@ -147,7 +141,6 @@ const HotelCardList: React.FC<{ hotels?: HotelCardProps[] }> = ({ hotels }) => {
             href="/detalle"
             target="_blank"
             rel="noopener noreferrer"
-            className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-200"
           >
             <HotelCard {...hotel} />
           </Link>
