@@ -25,8 +25,11 @@ const Header: React.FC = () => {
               height={42}
               className="object-contain"
             />
-            <span className="text-2xl font-bold drop-shadow-md">Maletalia</span>
-            <span className="text-2xl font-bold drop-shadow-md">
+            {/* En mobile se aplica borde y sombra, en pantallas medianas en adelante se eliminan */}
+            <span className="text-2xl font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md">
+              Maletalia
+            </span>
+            <span className="text-2xl font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md">
               .net
             </span>
           </Link>
