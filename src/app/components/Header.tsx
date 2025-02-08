@@ -27,7 +27,7 @@ const Header: React.FC = () => {
             />
             <span className="text-2xl font-bold drop-shadow-md">Maletalia</span>
             <span className="text-blue-300 text-2xl font-bold drop-shadow-md">
-              .com
+              .net
             </span>
           </Link>
           <div className="flex items-center gap-4">

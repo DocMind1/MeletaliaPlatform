@@ -1,4 +1,3 @@
-// app/components/HotelList.tsx
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -12,9 +11,10 @@ export interface HotelCardProps {
   price: number;
 }
 
+// Se quitan los estilos de fondo, borde y sombra del contenedor principal para
+// que dichos estilos sean aplicados en el Link que envuelve la tarjeta.
 const HotelCard: React.FC<HotelCardProps> = ({ name, location, rating, reviews, price }) => (
-  <div className="bg-white rounded-lg shadow-md overflow-hidden w-64 flex-shrink-0">
-    {/* Se reemplaza el campo gris por una imagen tomada de public/images/image3.jpg */}
+  <div className="w-64 flex-shrink-0">
     <Image 
       src="/images/image3.jpg"
       alt={name}
@@ -122,7 +122,7 @@ const HotelList: React.FC<{ hotels?: HotelCardProps[] }> = ({ hotels }) => {
       {/* Botón izquierda */}
       <button
         onClick={scrollLeft}
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full z-10 hover:bg-opacity-75"
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white text-blue-900 p-3 rounded-full shadow-md hover:shadow-xl transition duration-200 z-10"
       >
         &#8249;
       </button>
@@ -135,6 +135,7 @@ const HotelList: React.FC<{ hotels?: HotelCardProps[] }> = ({ hotels }) => {
               href="/detalle"
               target="_blank"
               rel="noopener noreferrer"
+              className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-200"
             >
               <HotelCard {...hotel} />
             </Link>
@@ -147,7 +148,7 @@ const HotelList: React.FC<{ hotels?: HotelCardProps[] }> = ({ hotels }) => {
       {/* Botón derecha */}
       <button
         onClick={scrollRight}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full z-10 hover:bg-opacity-75"
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-blue-900 p-3 rounded-full shadow-md hover:shadow-xl transition duration-200 z-10"
       >
         &#8250;
       </button>
