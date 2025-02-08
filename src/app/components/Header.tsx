@@ -11,7 +11,7 @@ const Header: React.FC = () => {
       style={{
         backgroundImage: "url('/images/header.png')",
         backgroundSize: "100% auto",
-        backgroundColor: "#123456", // Ajusta este color al de los bordes de la imagen
+        backgroundColor: "#fff", // Ajusta este color al de los bordes de la imagen
         minHeight: "455px",
       }}
     >
