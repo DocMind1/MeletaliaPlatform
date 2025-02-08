@@ -6,10 +6,10 @@ import { UserCircle } from "lucide-react";
 const Header: React.FC = () => {
   return (
     <header
-      className="bg-blue-900 text-white shadow-md bg-cover bg-center"
+      className="text-white shadow-md bg-cover bg-center"
       style={{ backgroundImage: "url('/images/header.png')" }}
     >
-      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-blue-900 bg-opacity-80">
+      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-6 py-4 ">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold flex items-center gap-2 mb-4 sm:mb-0">
           <Image
@@ -41,7 +41,7 @@ const Header: React.FC = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="text-white text-center py-10 bg-blue-900 bg-opacity-70">
+      <div className="text-white text-center py-10 ">
         <h1 className="text-3xl md:text-4xl font-bold">Encuentra tu próxima estancia</h1>
         <p className="text-base md:text-lg mt-2">Busca ofertas en hoteles, casas y mucho más...</p>
       </div>
