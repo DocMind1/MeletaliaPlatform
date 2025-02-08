@@ -26,7 +26,7 @@ const Header: React.FC = () => {
               className="object-contain"
             />
             <span className="text-2xl font-bold drop-shadow-md">Maletalia</span>
-            <span className="text-blue-300 text-2xl font-bold drop-shadow-md">
+            <span className="text-2xl font-bold drop-shadow-md">
               .net
             </span>
           </Link>
