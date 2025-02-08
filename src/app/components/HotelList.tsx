@@ -1,4 +1,3 @@
-// app/components/HotelList.tsx
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -26,7 +25,7 @@ const HotelCard: React.FC<HotelCardProps> = ({ name, location, rating, reviews, 
       <h3 className="text-lg font-semibold">{name}</h3>
       <p className="text-sm text-gray-600">{location}</p>
       <div className="flex items-center mt-2">
-        <span className="bg-blue-600 text-white px-2 py-1 rounded text-sm font-semibold">
+        <span className="bg-black text-white px-2 py-1 rounded text-sm font-semibold">
           {rating}
         </span>
         <p className="ml-2 text-gray-600 text-sm">
