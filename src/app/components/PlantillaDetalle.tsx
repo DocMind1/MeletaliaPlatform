@@ -104,7 +104,7 @@ export default function PlantillaDetalle() {
             <p className="text-sm text-gray-800">Hay parking privado en el hotel</p>
             <button
               onClick={openModal}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-700 mt-4"
+              className="bg-black text-white px-6 py-3 rounded-lg shadow-md hover:bg-black mt-4"
             >
               Ver fechas disponibles
             </button>
@@ -254,7 +254,7 @@ export default function PlantillaDetalle() {
               </button>
               <button
                 onClick={handleConfirmDates}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-4 py-2 bg-black text-white rounded hover:bg-black"
               >
                 Confirmar
               </button>
