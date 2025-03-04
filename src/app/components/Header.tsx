@@ -1,17 +1,27 @@
 "use client";
-
+import React, { useState, useContext } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { UserCircle } from "lucide-react";
+import { AuthContext } from "../context/AuthContext"; // Ajusta la ruta según tu estructura
 
 const Header: React.FC = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { user, setUser } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userSession");
+    setUser(null);
+    window.location.href = "/"; // Redirige al inicio tras cerrar sesión
+  };
+
   return (
     <header
       className="relative text-white shadow-md bg-center bg-no-repeat"
       style={{
         backgroundImage: "url('/images/header.png')",
         backgroundSize: "100% auto",
-        backgroundColor: "#fff", // Ajusta este color al de los bordes de la imagen
+        backgroundColor: "#fff",
         minHeight: "455px",
       }}
     >
@@ -25,7 +35,6 @@ const Header: React.FC = () => {
               height={42}
               className="object-contain"
             />
-            {/* En mobile se aplica borde y sombra, en pantallas medianas en adelante se eliminan */}
             <span className="text-2xl font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md">
               Maletalia
             </span>
@@ -34,18 +43,49 @@ const Header: React.FC = () => {
             </span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link
-              href="/registro"
-              className="bg-white text-blue-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 shadow-md"
-            >
-              Hazte una cuenta
-            </Link>
-            <Link
-              href="/login"
-              className="bg-white text-blue-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 shadow-md flex items-center gap-2"
-            >
-              <UserCircle size={20} /> Inicia sesión
-            </Link>
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex items-center gap-2 bg-white text-blue-900 px-3 py-1 rounded-lg shadow-md hover:bg-gray-200"
+                >
+                  <UserCircle size={24} />
+                  <span>MENU</span>
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 bg-white text-blue-900 rounded shadow-lg">
+                    <ul className="flex flex-col">
+                      <li className="px-4 py-2 hover:bg-gray-100">
+                        <Link href="/perfil">Perfil</Link>
+                      </li>
+                      {user.role?.id === 3 && (
+                        <li className="px-4 py-2 hover:bg-gray-100">
+                          <Link href="/dashboard">Dashboard</Link>
+                        </li>
+                      )}
+                      <li className="px-4 py-2 hover:bg-gray-100">
+                        <button onClick={handleLogout}>Cerrar sesión</button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/registro"
+                  className="bg-white text-blue-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 shadow-md"
+                >
+                  Hazte una cuenta
+                </Link>
+                <Link
+                  href="/login"
+                  className="bg-white text-blue-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 shadow-md flex items-center gap-2"
+                >
+                  <UserCircle size={20} /> Inicia sesión
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
