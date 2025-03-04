@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "../context/AuthContext"; // Ajusta la ruta según tu estructura
-import { createProperty, uploadFiles } from "../../../userService/userService";
+import { AuthContext } from "../context/AuthContext";
+import { createProperty, uploadDashboardImages } from "../../../userService/userService";
 
 export default function Dashboard() {
-  const { user } = useContext(AuthContext); // Obtener el usuario autenticado del contexto
+  const { user } = useContext(AuthContext);
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -20,7 +20,6 @@ export default function Dashboard() {
   const [mensaje, setMensaje] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Verificar si el usuario está autenticado y tiene rol de Propietario (ID 3)
   if (!user || user.role?.id !== 3) {
     return (
       <div className="max-w-2xl mx-auto p-6">
@@ -31,8 +30,10 @@ export default function Dashboard() {
     );
   }
 
-  const jwt = user.jwt; // Obtener el JWT del usuario autenticado
-  const userId = user.id; // Obtener el ID del usuario autenticado
+  console.log("Rol del usuario autenticado:", user.role?.id);
+
+  const jwt = user.jwt;
+  const userId = user.id;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,7 +48,6 @@ export default function Dashboard() {
     setLoading(true);
     setMensaje("");
 
-    // Validaciones básicas
     if (!formData.titulo || !formData.descripcion || !formData.precio || !formData.direccion) {
       setMensaje("Por favor, completa todos los campos obligatorios.");
       setLoading(false);
@@ -56,11 +56,11 @@ export default function Dashboard() {
 
     let imageIds: number[] | undefined;
     if (formData.imagenes) {
-      const uploadResult = await uploadFiles(Array.from(formData.imagenes), jwt);
+      const uploadResult = await uploadDashboardImages(Array.from(formData.imagenes), jwt);
       if (uploadResult.ok) {
         imageIds = uploadResult.ids;
       } else {
-        setMensaje("Error al subir imágenes: " + uploadResult.error);
+        setMensaje(`Error al subir imágenes: ${uploadResult.error}`);
         setLoading(false);
         return;
       }
@@ -88,9 +88,9 @@ export default function Dashboard() {
         numerodehabitaciones: "",
         numerodebanos: "",
         imagenes: null,
-      }); // Reiniciar formulario
+      });
     } else {
-      setMensaje("Error al crear la propiedad: " + result.error);
+      setMensaje(`Error al crear la propiedad: ${result.error}`);
     }
 
     setLoading(false);
