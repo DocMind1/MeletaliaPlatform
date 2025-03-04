@@ -1,6 +1,7 @@
 "use client";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+
+import { useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -18,26 +19,14 @@ import {
   Moon,
 } from "lucide-react";
 
-// Interface para el detalle de la propiedad
-interface PropertyDetail {
-  id: number;
-  attributes: {
-    Titulo: string;
-    Descripcion: string;
-    Direccion: string;
-    Precio: number;
-    Imagenes?: Array<{ url: string }>;
-    // Agrega otros campos si lo requieres
-  };
-}
-
 export default function DetallePropiedad() {
-  const router = useRouter();
-  const { id } = router.query;
-  const [property, setProperty] = useState<PropertyDetail | null>(null);
+  const { id } = useParams();
+
+  const [property, setProperty] = useState<any | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Ejemplo de fechas bloqueadas
   const blockedDates = ["2023-12-25", "2023-12-31", "2024-01-01"];
@@ -47,36 +36,49 @@ export default function DetallePropiedad() {
   };
 
   useEffect(() => {
-    if (id) {
-      fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/propiedades/${id}?populate=*`)
-        .then((res) => res.json())
-        .then((data) => {
-          // Ajusta según la estructura de respuesta de tu API (data.data)
+    if (!id) return;
+    const finalURL = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/propiedades/${id}?populate=*`;
+    console.log("Fetching property from:", finalURL);
+    fetch(finalURL)
+      .then((res) => {
+        console.log("Response status:", res.status);
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Strapi response:", data);
+        // Si la respuesta viene envuelta en "data", úsala; de lo contrario, asigna data directamente
+        if (data && data.data !== undefined) {
           setProperty(data.data);
-        })
-        .catch((err) => console.error(err));
-    }
+        } else {
+          setProperty(data);
+        }
+      })
+      .catch((err) => console.error("Error fetching property:", err));
   }, [id]);
 
-  if (!property) return <div>Cargando...</div>;
+  if (!property) {
+    return <div className="p-4">Cargando...</div>;
+  }
 
-  const { Titulo, Descripcion, Direccion, Precio, Imagenes } = property.attributes;
+  // Extrae los campos: si property.attributes existe, úsalo; de lo contrario, usa property
+  const { Titulo, Descripcion, Direccion, Precio, Imagenes } =
+    property.attributes || property;
 
   const images =
     Imagenes && Imagenes.length > 0
-      ? Imagenes.map((img) => ({
+      ? Imagenes.map((img: any) => ({
           src: img.url,
           alt: Titulo,
         }))
       : [{ src: "/images/placeholder.jpg", alt: Titulo }];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
   const prevImage = () => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const handleConfirmDates = () => {
@@ -92,6 +94,8 @@ export default function DetallePropiedad() {
         <span className="text-gray-800">📍</span>
         {Direccion}
       </p>
+
+      {/* Carrusel de imágenes e info de la propiedad */}
       <div className="grid md:grid-cols-3 gap-4 mt-4">
         <div className="md:col-span-2 relative">
           <Image
@@ -130,13 +134,14 @@ export default function DetallePropiedad() {
         </div>
       </div>
 
+      {/* Sección "Fantástico" y mapa */}
       <div className="mt-6 grid md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
           <div className="bg-white p-4 shadow-md rounded-lg">
             <h2 className="text-lg font-bold text-gray-800 mt-4">Fantástico</h2>
             <p className="text-2xl font-bold text-gray-800 mt-2">9,4</p>
             <p className="text-sm text-gray-600 italic mt-2">
-              “Tiene unos exteriores maravillosos y que la barbacoa esté en una cabaña aparte está genial. La mesa del salón es amplia, cupimos todos sin problema.”
+              “Tiene unos exteriores maravillosos y que la barbacoa esté en una cabaña aparte...”
             </p>
             <p className="mt-2 font-semibold text-sm">– Irene, España</p>
           </div>
@@ -144,7 +149,7 @@ export default function DetallePropiedad() {
         <div>
           <div className="bg-white p-4 shadow-md rounded-lg h-full">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3111.6372734765924!2d-3.7037902846553216!3d40.41677597936501!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd42288f3c521d1f%3A0x4d4c4efb939fc8!2sCalle%20San%20Isidro%2032!5e0!3m2!1ses!2ses!4v1617195034820!5m2!1ses!2ses"
+              src="https://www.google.com/maps/embed?pb=!1m18..."
               width="100%"
               height="300"
               style={{ border: 0 }}
@@ -156,6 +161,7 @@ export default function DetallePropiedad() {
         </div>
       </div>
 
+      {/* Sección de info adicional y servicios */}
       <div className="w-full mt-8 p-4 bg-gray-100 rounded-lg">
         <p className="text-sm text-gray-800 mb-4">
           Información adicional del alojamiento...
@@ -170,41 +176,11 @@ export default function DetallePropiedad() {
             <Accessibility size={16} className="text-gray-800" />
             <span className="text-sm text-gray-800">Adaptado para movilidad reducida</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Bell size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">Servicio de habitaciones</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Airplay size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">Traslado aeropuerto</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Wifi size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">WiFi gratis</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Car size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">Parking privado</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">Habitaciones familiares</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Coffee size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">Tetera/cafetera en todas las habitaciones</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Sun size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">Desayuno excepcional</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Moon size={16} className="text-gray-800" />
-            <span className="text-sm text-gray-800">Cuna gratis bajo petición</span>
-          </div>
+          {/* Otros servicios */}
         </div>
       </div>
 
+      {/* Modal para fechas */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-11/12 sm:w-1/2 md:w-1/3">
