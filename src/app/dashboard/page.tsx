@@ -11,7 +11,7 @@ import {
   STRAPI_URL,
 } from "../../../userService/userService";
 
-// Updated Property interface to match Strapi v5 response structure
+// Interfaz Property actualizada con fechas de disponibilidad
 interface Property {
   id: number;
   documentId: string;
@@ -42,6 +42,54 @@ interface Property {
     username: string;
     email: string;
   };
+  Servicios: {
+    WiFi: boolean;
+    Parking: boolean;
+    AdaptadoMovilidadReducida: boolean;
+    Piscina: boolean;
+    Gimnasio: boolean;
+    Spa: boolean;
+    Restaurante: boolean;
+    Bar: boolean;
+    Lavanderia: boolean;
+    Recepcion24h: boolean;
+    TransporteAeropuerto: boolean;
+    ServicioHabitaciones: boolean;
+    AdmiteMascotas: boolean;
+    ZonasFumadores: boolean;
+    AireAcondicionadoComun: boolean;
+    CalefaccionComun: boolean;
+    SalaConferencias: boolean;
+    AreaJuegosInfantiles: boolean;
+    Biblioteca: boolean;
+    Jardin: boolean;
+  };
+  Desayuno: string[];
+  Caracteristicas: {
+    Terraza: boolean;
+    VistasPanoramicas: boolean;
+    AireAcondicionado: boolean;
+    Calefaccion: boolean;
+    Minibar: boolean;
+    TVPantallaPlana: boolean;
+    CajaFuerte: boolean;
+    Escritorio: boolean;
+    Banera: boolean;
+    Ducha: boolean;
+    SecadorPelo: boolean;
+    ArticulosAseo: boolean;
+    Armario: boolean;
+    Insonorizacion: boolean;
+    Cafetera: boolean;
+    HervidorElectrico: boolean;
+    Microondas: boolean;
+    Nevera: boolean;
+    CamaExtraGrande: boolean;
+    ServicioStreaming: boolean;
+  };
+  PuntosFuertes: string;
+  DisponibleDesde?: string; // Añadido
+  DisponibleHasta?: string; // Añadido
 }
 
 export default function Dashboard() {
@@ -49,7 +97,7 @@ export default function Dashboard() {
   const router = useRouter();
 
   const [properties, setProperties] = useState<Property[]>([]);
-  const [showModal, setShowModal] = useState(false); // Changed from showForm to showModal
+  const [showModal, setShowModal] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [formData, setFormData] = useState({
     Titulo: "",
@@ -60,9 +108,57 @@ export default function Dashboard() {
     Numerodebanos: "",
     publishedAt: "",
     imagenes: null as FileList | null,
+    Servicios: {
+      WiFi: false,
+      Parking: false,
+      AdaptadoMovilidadReducida: false,
+      Piscina: false,
+      Gimnasio: false,
+      Spa: false,
+      Restaurante: false,
+      Bar: false,
+      Lavanderia: false,
+      Recepcion24h: false,
+      TransporteAeropuerto: false,
+      ServicioHabitaciones: false,
+      AdmiteMascotas: false,
+      ZonasFumadores: false,
+      AireAcondicionadoComun: false,
+      CalefaccionComun: false,
+      SalaConferencias: false,
+      AreaJuegosInfantiles: false,
+      Biblioteca: false,
+      Jardin: false,
+    },
+    Desayuno: [] as string[],
+    Caracteristicas: {
+      Terraza: false,
+      VistasPanoramicas: false,
+      AireAcondicionado: false,
+      Calefaccion: false,
+      Minibar: false,
+      TVPantallaPlana: false,
+      CajaFuerte: false,
+      Escritorio: false,
+      Banera: false,
+      Ducha: false,
+      SecadorPelo: false,
+      ArticulosAseo: false,
+      Armario: false,
+      Insonorizacion: false,
+      Cafetera: false,
+      HervidorElectrico: false,
+      Microondas: false,
+      Nevera: false,
+      CamaExtraGrande: false,
+      ServicioStreaming: false,
+    },
+    PuntosFuertes: "",
+    DisponibleDesde: "", // Añadido
+    DisponibleHasta: "", // Añadido
   });
   const [mensaje, setMensaje] = useState("");
-  const [mensajeType, setMensajeType] = useState<"success" | "error" | "">(""); // For toast styling
+  const [mensajeType, setMensajeType] = useState<"success" | "error" | "">("");
   const [loading, setLoading] = useState(false);
   const [isLoadingProperties, setIsLoadingProperties] = useState(true);
 
@@ -80,7 +176,7 @@ export default function Dashboard() {
       const timer = setTimeout(() => {
         setMensaje("");
         setMensajeType("");
-      }, 3000); // Toast disappears after 3 seconds
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [mensaje]);
@@ -88,11 +184,8 @@ export default function Dashboard() {
   const loadProperties = async () => {
     setIsLoadingProperties(true);
     const result = await getProperties(jwt, userId);
-    console.log("Result from getProperties:", result);
     if (result.ok) {
-      const fetchedProperties = result.properties || [];
-      console.log("Fetched properties before setting state:", fetchedProperties);
-      setProperties(fetchedProperties);
+      setProperties(result.properties || []);
     } else {
       setMensaje("Error al cargar propiedades");
       setMensajeType("error");
@@ -101,8 +194,32 @@ export default function Dashboard() {
     setIsLoadingProperties(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      if (name in formData.Servicios) {
+        setFormData({
+          ...formData,
+          Servicios: { ...formData.Servicios, [name]: checked },
+        });
+      } else if (name in formData.Caracteristicas) {
+        setFormData({
+          ...formData,
+          Caracteristicas: { ...formData.Caracteristicas, [name]: checked },
+        });
+      }
+    } else if (type === "select-multiple") {
+      const selectedOptions = Array.from(
+        (e.target as HTMLSelectElement).selectedOptions,
+        (option) => option.value
+      );
+      setFormData({ ...formData, [name]: selectedOptions });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,7 +237,10 @@ export default function Dashboard() {
       let imageIds: number[] | undefined;
 
       if (formData.imagenes) {
-        const uploadResult = await uploadDashboardImages(Array.from(formData.imagenes), jwt);
+        const uploadResult = await uploadDashboardImages(
+          Array.from(formData.imagenes),
+          jwt
+        );
         if (uploadResult.ok) {
           imageIds = uploadResult.ids;
         } else {
@@ -136,33 +256,44 @@ export default function Dashboard() {
         Descripcion: formData.Descripcion,
         Precio: parseFloat(formData.Precio),
         Direccion: formData.Direccion,
-        Numerodehabitaciones: formData.Numerodehabitaciones ? parseInt(formData.Numerodehabitaciones) : undefined,
-        Numerodebanos: formData.Numerodebanos ? parseInt(formData.Numerodebanos) : undefined,
-        publishedAt: formData.publishedAt ? `${formData.publishedAt}T00:00:00.000Z` : undefined,
+        Numerodehabitaciones: formData.Numerodehabitaciones
+          ? parseInt(formData.Numerodehabitaciones)
+          : undefined,
+        Numerodebanos: formData.Numerodebanos
+          ? parseInt(formData.Numerodebanos)
+          : undefined,
+        publishedAt: formData.publishedAt
+          ? `${formData.publishedAt}T00:00:00.000Z`
+          : undefined,
+        DisponibleDesde: formData.DisponibleDesde || undefined, // Añadido
+        DisponibleHasta: formData.DisponibleHasta || undefined, // Añadido
         users_permissions_user: userId,
         Imagenes: imageIds,
+        Servicios: formData.Servicios,
+        Desayuno: formData.Desayuno,
+        Caracteristicas: formData.Caracteristicas,
+        PuntosFuertes: formData.PuntosFuertes,
       };
-
-      console.log("Submitting with editingProperty:", editingProperty);
-      console.log("Property data being sent:", propertyData);
 
       const result = editingProperty
         ? await updateProperty(editingProperty.id, propertyData, jwt)
         : await createProperty(propertyData, jwt);
 
       if (result.ok) {
-        setMensaje(editingProperty ? "Propiedad actualizada con éxito." : "Propiedad creada con éxito.");
+        setMensaje(
+          editingProperty
+            ? "Propiedad actualizada con éxito."
+            : "Propiedad creada con éxito."
+        );
         setMensajeType("success");
         setShowModal(false);
         setEditingProperty(null);
         await loadProperties();
       } else {
-        console.error("Error updating/creating property:", result.error);
         setMensaje(`Error: ${result.error}`);
         setMensajeType("error");
       }
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
       setMensaje("Error en la conexión al servidor.");
       setMensajeType("error");
     } finally {
@@ -192,13 +323,11 @@ export default function Dashboard() {
     );
   }
 
-  console.log("Rol del usuario autenticado:", user.role?.id);
-
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Fixed Header */}
       <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-10">
-
+        {/* Contenido del header si lo necesitas */}
       </header>
 
       {/* Main Content */}
@@ -214,7 +343,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Modal for Create/Edit */}
+        {/* Popup (Modal) para el Formulario */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
             <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
@@ -222,8 +351,11 @@ export default function Dashboard() {
                 {editingProperty ? "Editar Propiedad" : "Crear Propiedad"}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Título */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Título *</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Título *
+                  </label>
                   <input
                     type="text"
                     name="Titulo"
@@ -233,8 +365,11 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                {/* Descripción */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Descripción *</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Descripción *
+                  </label>
                   <textarea
                     name="Descripcion"
                     value={formData.Descripcion}
@@ -243,8 +378,11 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                {/* Precio */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Precio (€) *</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Precio (€) *
+                  </label>
                   <input
                     type="number"
                     name="Precio"
@@ -256,8 +394,11 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                {/* Dirección */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Dirección *</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Dirección *
+                  </label>
                   <input
                     type="text"
                     name="Direccion"
@@ -267,8 +408,11 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                {/* Número de habitaciones */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Número de habitaciones</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Número de habitaciones
+                  </label>
                   <input
                     type="number"
                     name="Numerodehabitaciones"
@@ -278,8 +422,11 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                {/* Número de baños */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Número de baños</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Número de baños
+                  </label>
                   <input
                     type="number"
                     name="Numerodebanos"
@@ -289,8 +436,11 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                {/* Fecha de publicación */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Fecha de publicación</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Fecha de publicación
+                  </label>
                   <input
                     type="date"
                     name="publishedAt"
@@ -299,8 +449,137 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                {/* Fecha de Disponibilidad Desde */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Imágenes</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Disponible Desde
+                  </label>
+                  <input
+                    type="date"
+                    name="DisponibleDesde"
+                    value={formData.DisponibleDesde}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                {/* Fecha de Disponibilidad Hasta */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Disponible Hasta
+                  </label>
+                  <input
+                    type="date"
+                    name="DisponibleHasta"
+                    value={formData.DisponibleHasta}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                {/* Servicios */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Servicios
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(formData.Servicios).map(
+                      ([servicio, checked]) => (
+                        <label
+                          key={servicio}
+                          className="flex items-center space-x-2"
+                        >
+                          <input
+                            type="checkbox"
+                            name={servicio}
+                            checked={checked}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {servicio
+                              .replace(/([A-Z])/g, " $1")
+                              .trim()
+                              .replace("Adaptado Movilidad Reducida", "Adaptado movilidad reducida")
+                              .replace("Recepcion24h", "Recepción 24h")
+                              .replace("Aire Acondicionado Comun", "Aire acondicionado común")
+                              .replace("Calefaccion Comun", "Calefacción común")
+                              .replace("Area Juegos Infantiles", "Área juegos infantiles")}
+                          </span>
+                        </label>
+                      )
+                    )}
+                  </div>
+                </div>
+                {/* Opciones de Desayuno */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Opciones de Desayuno
+                  </h3>
+                  <select
+                    multiple
+                    name="Desayuno"
+                    value={formData.Desayuno}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="Continental">Continental</option>
+                    <option value="Vegetariano">Vegetariano</option>
+                    <option value="Vegano">Vegano</option>
+                    <option value="Sin Gluten">Sin Gluten</option>
+                    <option value="Buffet">Buffet</option>
+                  </select>
+                </div>
+                {/* Características de las Habitaciones */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Características de las Habitaciones
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(formData.Caracteristicas).map(
+                      ([caracteristica, checked]) => (
+                        <label
+                          key={caracteristica}
+                          className="flex items-center space-x-2"
+                        >
+                          <input
+                            type="checkbox"
+                            name={caracteristica}
+                            checked={checked}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {caracteristica
+                              .replace(/([A-Z])/g, " $1")
+                              .trim()
+                              .replace("Vistas Panoramicas", "Vistas panorámicas")
+                              .replace("TV Pantalla Plana", "TV pantalla plana")
+                              .replace("Articulos Aseo", "Artículos de aseo")
+                              .replace("Hervidor Electrico", "Hervidor eléctrico")
+                              .replace("Cama Extra Grande", "Cama extra grande")
+                              .replace("Servicio Streaming", "Servicio de streaming")}
+                          </span>
+                        </label>
+                      )
+                    )}
+                  </div>
+                </div>
+                {/* Puntos Fuertes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Puntos Fuertes
+                  </label>
+                  <textarea
+                    name="PuntosFuertes"
+                    value={formData.PuntosFuertes}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                {/* Imágenes */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Imágenes
+                  </label>
                   <input
                     type="file"
                     name="imagenes"
@@ -309,17 +588,26 @@ export default function Dashboard() {
                     onChange={handleFileChange}
                     className="mt-1 block w-full"
                   />
-                  <p className="text-sm text-gray-500">Arrastra y suelta o haz clic para añadir imágenes.</p>
+                  <p className="text-sm text-gray-500">
+                    Arrastra y suelta o haz clic para añadir imágenes.
+                  </p>
                 </div>
+                {/* Botones */}
                 <div className="flex space-x-4">
                   <button
                     type="submit"
                     disabled={loading}
                     className={`flex-1 py-2 rounded-md flex justify-center items-center ${
-                      loading ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                      loading
+                        ? "bg-gray-500 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700"
                     } text-white transition duration-200`}
                   >
-                    {loading ? "Guardando..." : editingProperty ? "Actualizar Propiedad" : "Crear Propiedad"}
+                    {loading
+                      ? "Guardando..."
+                      : editingProperty
+                      ? "Actualizar Propiedad"
+                      : "Crear Propiedad"}
                   </button>
                   <button
                     type="button"
@@ -335,6 +623,54 @@ export default function Dashboard() {
                         Numerodebanos: "",
                         publishedAt: "",
                         imagenes: null,
+                        Servicios: {
+                          WiFi: false,
+                          Parking: false,
+                          AdaptadoMovilidadReducida: false,
+                          Piscina: false,
+                          Gimnasio: false,
+                          Spa: false,
+                          Restaurante: false,
+                          Bar: false,
+                          Lavanderia: false,
+                          Recepcion24h: false,
+                          TransporteAeropuerto: false,
+                          ServicioHabitaciones: false,
+                          AdmiteMascotas: false,
+                          ZonasFumadores: false,
+                          AireAcondicionadoComun: false,
+                          CalefaccionComun: false,
+                          SalaConferencias: false,
+                          AreaJuegosInfantiles: false,
+                          Biblioteca: false,
+                          Jardin: false,
+                        },
+                        Desayuno: [],
+                        Caracteristicas: {
+                          Terraza: false,
+                          VistasPanoramicas: false,
+                          AireAcondicionado: false,
+                          Calefaccion: false,
+                          Minibar: false,
+                          TVPantallaPlana: false,
+                          CajaFuerte: false,
+                          Escritorio: false,
+                          Banera: false,
+                          Ducha: false,
+                          SecadorPelo: false,
+                          ArticulosAseo: false,
+                          Armario: false,
+                          Insonorizacion: false,
+                          Cafetera: false,
+                          HervidorElectrico: false,
+                          Microondas: false,
+                          Nevera: false,
+                          CamaExtraGrande: false,
+                          ServicioStreaming: false,
+                        },
+                        PuntosFuertes: "",
+                        DisponibleDesde: "", // Añadido
+                        DisponibleHasta: "", // Añadido
                       });
                     }}
                     className="flex-1 py-2 rounded-md bg-gray-300 text-gray-700 hover:bg-gray-400 transition duration-200"
@@ -347,30 +683,80 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Listado de Propiedades */}
         <div className="mt-8">
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-800">Mis Propiedades</h2>
-
-          <button
-            onClick={() => {
-              setShowModal(true);
-              setEditingProperty(null);
-              setFormData({
-                Titulo: "",
-                Descripcion: "",
-                Precio: "",
-                Direccion: "",
-                Numerodehabitaciones: "",
-                Numerodebanos: "",
-                publishedAt: "",
-                imagenes: null,
-              });
-            }}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
-          >
-            Crear Nueva Propiedad
-          </button>
-        </div>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+              Mis Propiedades
+            </h2>
+            <button
+              onClick={() => {
+                setShowModal(true);
+                setEditingProperty(null);
+                setFormData({
+                  Titulo: "",
+                  Descripcion: "",
+                  Precio: "",
+                  Direccion: "",
+                  Numerodehabitaciones: "",
+                  Numerodebanos: "",
+                  publishedAt: "",
+                  imagenes: null,
+                  Servicios: {
+                    WiFi: false,
+                    Parking: false,
+                    AdaptadoMovilidadReducida: false,
+                    Piscina: false,
+                    Gimnasio: false,
+                    Spa: false,
+                    Restaurante: false,
+                    Bar: false,
+                    Lavanderia: false,
+                    Recepcion24h: false,
+                    TransporteAeropuerto: false,
+                    ServicioHabitaciones: false,
+                    AdmiteMascotas: false,
+                    ZonasFumadores: false,
+                    AireAcondicionadoComun: false,
+                    CalefaccionComun: false,
+                    SalaConferencias: false,
+                    AreaJuegosInfantiles: false,
+                    Biblioteca: false,
+                    Jardin: false,
+                  },
+                  Desayuno: [],
+                  Caracteristicas: {
+                    Terraza: false,
+                    VistasPanoramicas: false,
+                    AireAcondicionado: false,
+                    Calefaccion: false,
+                    Minibar: false,
+                    TVPantallaPlana: false,
+                    CajaFuerte: false,
+                    Escritorio: false,
+                    Banera: false,
+                    Ducha: false,
+                    SecadorPelo: false,
+                    ArticulosAseo: false,
+                    Armario: false,
+                    Insonorizacion: false,
+                    Cafetera: false,
+                    HervidorElectrico: false,
+                    Microondas: false,
+                    Nevera: false,
+                    CamaExtraGrande: false,
+                    ServicioStreaming: false,
+                  },
+                  PuntosFuertes: "",
+                  DisponibleDesde: "", // Añadido
+                  DisponibleHasta: "", // Añadido
+                });
+              }}
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
+            >
+              Crear Nueva Propiedad
+            </button>
+          </div>
           {isLoadingProperties ? (
             <div className="flex justify-center items-center">
               <svg
@@ -393,14 +779,21 @@ export default function Dashboard() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              <span className="ml-2 text-gray-600">Cargando propiedades...</span>
+              <span className="ml-2 text-gray-600">
+                Cargando propiedades...
+              </span>
             </div>
           ) : properties.length === 0 ? (
-            <p className="text-gray-600 text-center">No hay propiedades disponibles.</p>
+            <p className="text-gray-600 text-center">
+              No hay propiedades disponibles.
+            </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties.map((prop) => {
-                const imageUrl = prop.Imagenes?.length && prop.Imagenes[0]?.url ? prop.Imagenes[0].url : null;
+                const imageUrl =
+                  prop.Imagenes?.length && prop.Imagenes[0]?.url
+                    ? prop.Imagenes[0].url
+                    : null;
 
                 return (
                   <div
@@ -413,7 +806,9 @@ export default function Dashboard() {
                         alt={prop.Titulo}
                         className="w-full h-48 object-cover"
                         onError={(e) => {
-                          console.log(`Error cargando imagen para ${prop.Titulo}: ${imageUrl}`);
+                          console.log(
+                            `Error cargando imagen para ${prop.Titulo}: ${imageUrl}`
+                          );
                           e.currentTarget.src = "/images/placeholder.jpg";
                         }}
                       />
@@ -423,20 +818,41 @@ export default function Dashboard() {
                       </div>
                     )}
                     <div className="p-4">
-                      <h3 className="text-lg font-bold text-gray-800">{prop.Titulo}</h3>
+                      <h3 className="text-lg font-bold text-gray-800">
+                        {prop.Titulo}
+                      </h3>
                       <p className="text-sm text-gray-600 mt-1">
                         Precio: €{prop.Precio.toFixed(2)}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Habitaciones: {prop.Numerodehabitaciones || "N/A"} | Baños: {prop.Numerodebanos || "N/A"}
+                        Habitaciones: {prop.Numerodehabitaciones || "N/A"} |
+                        Baños: {prop.Numerodebanos || "N/A"}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
                         Creado: {new Date(prop.createdAt).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Publicado: {prop.publishedAt ? new Date(prop.publishedAt).toLocaleDateString() : "No publicado"}
+                        Publicado:{" "}
+                        {prop.publishedAt
+                          ? new Date(prop.publishedAt).toLocaleDateString()
+                          : "No publicado"}
                       </p>
-                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">{prop.Descripcion}</p>
+                      {/* Añadido: Fechas de disponibilidad en la visualización */}
+                      <p className="text-sm text-gray-600">
+                        Disponible Desde:{" "}
+                        {prop.DisponibleDesde
+                          ? new Date(prop.DisponibleDesde).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Disponible Hasta:{" "}
+                        {prop.DisponibleHasta
+                          ? new Date(prop.DisponibleHasta).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                        {prop.Descripcion}
+                      </p>
                     </div>
                     <div className="p-4 pt-0 flex space-x-2">
                       <button
@@ -448,10 +864,66 @@ export default function Dashboard() {
                             Descripcion: prop.Descripcion,
                             Precio: prop.Precio.toString(),
                             Direccion: prop.Direccion,
-                            Numerodehabitaciones: prop.Numerodehabitaciones?.toString() || "",
-                            Numerodebanos: prop.Numerodebanos?.toString() || "",
-                            publishedAt: prop.publishedAt ? prop.publishedAt.split("T")[0] : "",
+                            Numerodehabitaciones:
+                              prop.Numerodehabitaciones?.toString() || "",
+                            Numerodebanos:
+                              prop.Numerodebanos?.toString() || "",
+                            publishedAt: prop.publishedAt
+                              ? prop.publishedAt.split("T")[0]
+                              : "",
                             imagenes: null,
+                            Servicios: prop.Servicios || {
+                              WiFi: false,
+                              Parking: false,
+                              AdaptadoMovilidadReducida: false,
+                              Piscina: false,
+                              Gimnasio: false,
+                              Spa: false,
+                              Restaurante: false,
+                              Bar: false,
+                              Lavanderia: false,
+                              Recepcion24h: false,
+                              TransporteAeropuerto: false,
+                              ServicioHabitaciones: false,
+                              AdmiteMascotas: false,
+                              ZonasFumadores: false,
+                              AireAcondicionadoComun: false,
+                              CalefaccionComun: false,
+                              SalaConferencias: false,
+                              AreaJuegosInfantiles: false,
+                              Biblioteca: false,
+                              Jardin: false,
+                            },
+                            Desayuno: prop.Desayuno || [],
+                            Caracteristicas: prop.Caracteristicas || {
+                              Terraza: false,
+                              VistasPanoramicas: false,
+                              AireAcondicionado: false,
+                              Calefaccion: false,
+                              Minibar: false,
+                              TVPantallaPlana: false,
+                              CajaFuerte: false,
+                              Escritorio: false,
+                              Banera: false,
+                              Ducha: false,
+                              SecadorPelo: false,
+                              ArticulosAseo: false,
+                              Armario: false,
+                              Insonorizacion: false,
+                              Cafetera: false,
+                              HervidorElectrico: false,
+                              Microondas: false,
+                              Nevera: false,
+                              CamaExtraGrande: false,
+                              ServicioStreaming: false,
+                            },
+                            PuntosFuertes: prop.PuntosFuertes || "",
+                            DisponibleDesde: prop.DisponibleDesde
+                              ? prop.DisponibleDesde.split("T")[0]
+                              : "", // Añadido
+                            DisponibleHasta: prop.DisponibleHasta
+                              ? prop.DisponibleHasta.split("T")[0]
+                              : "", // Añadido
                           });
                         }}
                         className="flex-1 bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-200"
