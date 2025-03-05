@@ -88,8 +88,8 @@ interface Property {
     ServicioStreaming: boolean;
   };
   PuntosFuertes: string;
-  DisponibleDesde?: string; // Añadido
-  DisponibleHasta?: string; // Añadido
+  DisponibleDesde?: string;
+  DisponibleHasta?: string;
 }
 
 export default function Dashboard() {
@@ -154,8 +154,8 @@ export default function Dashboard() {
       ServicioStreaming: false,
     },
     PuntosFuertes: "",
-    DisponibleDesde: "", // Añadido
-    DisponibleHasta: "", // Añadido
+    DisponibleDesde: "",
+    DisponibleHasta: "",
   });
   const [mensaje, setMensaje] = useState("");
   const [mensajeType, setMensajeType] = useState<"success" | "error" | "">("");
@@ -224,7 +224,16 @@ export default function Dashboard() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFormData({ ...formData, imagenes: e.target.files });
+      const selectedFiles = e.target.files;
+      // Validar que no se suban más de 8 imágenes
+      if (selectedFiles.length > 8) {
+        setMensaje("No puedes subir más de 8 imágenes.");
+        setMensajeType("error");
+        // Limpiar el input para evitar que se procesen más de 8 imágenes
+        e.target.value = "";
+        return;
+      }
+      setFormData({ ...formData, imagenes: selectedFiles });
     }
   };
 
@@ -265,8 +274,12 @@ export default function Dashboard() {
         publishedAt: formData.publishedAt
           ? `${formData.publishedAt}T00:00:00.000Z`
           : undefined,
-        DisponibleDesde: formData.DisponibleDesde || undefined, // Añadido
-        DisponibleHasta: formData.DisponibleHasta || undefined, // Añadido
+        DisponibleDesde: formData.DisponibleDesde
+          ? `${formData.DisponibleDesde}T00:00:00.000Z`
+          : undefined,
+        DisponibleHasta: formData.DisponibleHasta
+          ? `${formData.DisponibleHasta}T00:00:00.000Z`
+          : undefined,
         users_permissions_user: userId,
         Imagenes: imageIds,
         Servicios: formData.Servicios,
@@ -578,7 +591,7 @@ export default function Dashboard() {
                 {/* Imágenes */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Imágenes
+                    Imágenes (máximo 8)
                   </label>
                   <input
                     type="file"
@@ -589,7 +602,7 @@ export default function Dashboard() {
                     className="mt-1 block w-full"
                   />
                   <p className="text-sm text-gray-500">
-                    Arrastra y suelta o haz clic para añadir imágenes.
+                    Arrastra y suelta o haz clic para añadir hasta 8 imágenes.
                   </p>
                 </div>
                 {/* Botones */}
@@ -669,8 +682,8 @@ export default function Dashboard() {
                           ServicioStreaming: false,
                         },
                         PuntosFuertes: "",
-                        DisponibleDesde: "", // Añadido
-                        DisponibleHasta: "", // Añadido
+                        DisponibleDesde: "",
+                        DisponibleHasta: "",
                       });
                     }}
                     className="flex-1 py-2 rounded-md bg-gray-300 text-gray-700 hover:bg-gray-400 transition duration-200"
@@ -748,8 +761,8 @@ export default function Dashboard() {
                     ServicioStreaming: false,
                   },
                   PuntosFuertes: "",
-                  DisponibleDesde: "", // Añadido
-                  DisponibleHasta: "", // Añadido
+                  DisponibleDesde: "",
+                  DisponibleHasta: "",
                 });
               }}
               className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
@@ -837,7 +850,6 @@ export default function Dashboard() {
                           ? new Date(prop.publishedAt).toLocaleDateString()
                           : "No publicado"}
                       </p>
-                      {/* Añadido: Fechas de disponibilidad en la visualización */}
                       <p className="text-sm text-gray-600">
                         Disponible Desde:{" "}
                         {prop.DisponibleDesde
@@ -920,10 +932,10 @@ export default function Dashboard() {
                             PuntosFuertes: prop.PuntosFuertes || "",
                             DisponibleDesde: prop.DisponibleDesde
                               ? prop.DisponibleDesde.split("T")[0]
-                              : "", // Añadido
+                              : "",
                             DisponibleHasta: prop.DisponibleHasta
                               ? prop.DisponibleHasta.split("T")[0]
-                              : "", // Añadido
+                              : "",
                           });
                         }}
                         className="flex-1 bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-200"

@@ -20,21 +20,58 @@ export interface PropertyBody {
   Direccion: string;
   Numerodehabitaciones?: number;
   Numerodebanos?: number;
+  publishedAt?: string;
   users_permissions_user: number;
   Imagenes?: number[];
+  Servicios?: {
+    WiFi: boolean;
+    Parking: boolean;
+    AdaptadoMovilidadReducida: boolean;
+    Piscina: boolean;
+    Gimnasio: boolean;
+    Spa: boolean;
+    Restaurante: boolean;
+    Bar: boolean;
+    Lavanderia: boolean;
+    Recepcion24h: boolean;
+    TransporteAeropuerto: boolean;
+    ServicioHabitaciones: boolean;
+    AdmiteMascotas: boolean;
+    ZonasFumadores: boolean;
+    AireAcondicionadoComun: boolean;
+    CalefaccionComun: boolean;
+    SalaConferencias: boolean;
+    AreaJuegosInfantiles: boolean;
+    Biblioteca: boolean;
+    Jardin: boolean;
+  };
+  Desayuno?: string[];
+  Caracteristicas?: {
+    Terraza: boolean;
+    VistasPanoramicas: boolean;
+    AireAcondicionado: boolean;
+    Calefaccion: boolean;
+    Minibar: boolean;
+    TVPantallaPlana: boolean;
+    CajaFuerte: boolean;
+    Escritorio: boolean;
+    Banera: boolean;
+    Ducha: boolean;
+    SecadorPelo: boolean;
+    ArticulosAseo: boolean;
+    Armario: boolean;
+    Insonorizacion: boolean;
+    Cafetera: boolean;
+    HervidorElectrico: boolean;
+    Microondas: boolean;
+    Nevera: boolean;
+    CamaExtraGrande: boolean;
+    ServicioStreaming: boolean;
+  };
+  PuntosFuertes?: string;
+  DisponibleDesde?: string;
+  DisponibleHasta?: string;
 }
-
-export interface PropertyBody {
-  Titulo: string;
-  Descripcion: string;
-  Precio: number;
-  Direccion: string;
-  Numerodehabitaciones?: number;
-  Numerodebanos?: number;
-  users_permissions_user: number;
-  Imagenes?: number[];
-}
-
 
 
 export const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
@@ -92,7 +129,7 @@ export async function createProperty(data: PropertyBody, jwt: string | null) {
       body: JSON.stringify({ data }),
     });
     const result = await response.json();
-    console.log("Respuesta del servidor:", result); // Log para depuración
+    console.log("Respuesta del servidor:", result);
     if (response.ok) {
       console.log("Propiedad creada con éxito:", result);
       return { ok: true, property: result.data };
@@ -105,7 +142,6 @@ export async function createProperty(data: PropertyBody, jwt: string | null) {
     return { ok: false, error: "Error en la conexión al servidor" };
   }
 }
-
 
 export async function uploadDashboardImages(files: File[], jwt: string | null) {
   const formData = new FormData();
