@@ -1,13 +1,14 @@
 "use client";
-import React, { useState, useContext } from "react";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { UserCircle } from "lucide-react";
-import { AuthContext } from "../context/AuthContext"; // Ajusta la ruta según tu estructura
+import { useAuth } from "../context/AuthContext"; // Ajusta la ruta según tu estructura
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser } = useAuth(); // Usar useAuth para obtener el usuario autenticado
 
   const handleLogout = () => {
     localStorage.removeItem("userSession");
@@ -59,8 +60,18 @@ const Header: React.FC = () => {
                         <Link href="/perfil">Perfil</Link>
                       </li>
                       {user.role?.id === 3 && (
+                        <>
+                          <li className="px-4 py-2 hover:bg-gray-100">
+                            <Link href="/dashboard">Dashboard</Link>
+                          </li>
+                          <li className="px-4 py-2 hover:bg-gray-100">
+                            <Link href="/reservas">Mis Reservas Recibidas</Link>
+                          </li>
+                        </>
+                      )}
+                      {user.role?.id === 2 && (
                         <li className="px-4 py-2 hover:bg-gray-100">
-                          <Link href="/dashboard">Dashboard</Link>
+                          <Link href="/reservas">Mis Reservas</Link>
                         </li>
                       )}
                       <li className="px-4 py-2 hover:bg-gray-100">

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext, useAuth } from "../context/AuthContext";
 import {
   createProperty,
   uploadDashboardImages,
@@ -10,6 +10,8 @@ import {
   updateProperty,
   STRAPI_URL,
 } from "../../../userService/userService";
+
+import ReservationsDashboard from "../components/ReservationsDashboard";
 
 // Interfaz Property actualizada con fechas de disponibilidad
 interface Property {
@@ -93,7 +95,7 @@ interface Property {
 }
 
 export default function Dashboard() {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useAuth();
   const router = useRouter();
 
   const [properties, setProperties] = useState<Property[]>([]);
@@ -163,8 +165,8 @@ export default function Dashboard() {
   const [isLoadingProperties, setIsLoadingProperties] = useState(true);
 
   const jwt = user?.jwt || null;
-  const userId = parseInt(user?.id || "0", 10);
-
+  const userId = user ? parseInt(user.id.toString(), 10) : 0;
+  
   useEffect(() => {
     if (jwt && userId) {
       loadProperties();
@@ -348,9 +350,8 @@ export default function Dashboard() {
         {/* Toast Notification */}
         {mensaje && (
           <div
-            className={`fixed top-20 right-6 px-6 py-3 rounded-md shadow-lg text-white transition-opacity duration-300 ${
-              mensajeType === "success" ? "bg-green-500" : "bg-red-500"
-            }`}
+            className={`fixed top-20 right-6 px-6 py-3 rounded-md shadow-lg text-white transition-opacity duration-300 ${mensajeType === "success" ? "bg-green-500" : "bg-red-500"
+              }`}
           >
             {mensaje}
           </div>
@@ -378,6 +379,18 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+
+
+
+      
+
+
+
+
+
+
+
+
                 {/* Descripción */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -610,17 +623,16 @@ export default function Dashboard() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`flex-1 py-2 rounded-md flex justify-center items-center ${
-                      loading
+                    className={`flex-1 py-2 rounded-md flex justify-center items-center ${loading
                         ? "bg-gray-500 cursor-not-allowed"
                         : "bg-blue-600 hover:bg-blue-700"
-                    } text-white transition duration-200`}
+                      } text-white transition duration-200`}
                   >
                     {loading
                       ? "Guardando..."
                       : editingProperty
-                      ? "Actualizar Propiedad"
-                      : "Crear Propiedad"}
+                        ? "Actualizar Propiedad"
+                        : "Crear Propiedad"}
                   </button>
                   <button
                     type="button"
