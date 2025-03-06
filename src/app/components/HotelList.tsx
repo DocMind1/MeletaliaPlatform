@@ -30,6 +30,14 @@ const HotelCard: React.FC<HotelCardProps> = ({ name, location, price, imageUrl }
   </div>
 );
 
+interface Property {
+  id: number;
+  Titulo: string;
+  Direccion: string;
+  Precio: number;
+  Imagenes: { url: string }[] | null;
+}
+
 const HotelList: React.FC = () => {
   const [hotelData, setHotelData] = useState<HotelCardProps[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +47,7 @@ const HotelList: React.FC = () => {
     const fetchProperties = async () => {
       const result = await getAllProperties();
       if (result.ok && result.properties.length > 0) {
-        const mappedProperties = result.properties.map((prop: any) => ({
+        const mappedProperties = result.properties.map((prop: Property) => ({
           id: prop.id,
           name: prop.Titulo,
           location: prop.Direccion,
@@ -78,7 +86,6 @@ const HotelList: React.FC = () => {
 
   return (
     <div className="relative">
-      {/* Botón izquierda */}
       <button
         onClick={scrollLeft}
         className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full z-10 hover:bg-opacity-75"
@@ -105,7 +112,6 @@ const HotelList: React.FC = () => {
         )}
       </div>
 
-      {/* Botón derecha */}
       <button
         onClick={scrollRight}
         className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full z-10 hover:bg-opacity-75"
@@ -115,11 +121,11 @@ const HotelList: React.FC = () => {
 
       <style jsx>{`
         .carousel {
-          -ms-overflow-style: none; /* IE y Edge */
-          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
         .carousel::-webkit-scrollbar {
-          display: none; /* Chrome, Safari y Opera */
+          display: none;
         }
       `}</style>
     </div>
