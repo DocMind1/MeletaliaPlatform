@@ -26,7 +26,7 @@ const Header: React.FC = () => {
         minHeight: "455px",
       }}
     >
-      <div className="absolute top-0 left-0 w-full px-6 py-4 z-10">
+      <div className="absolute top-0 left-0 w-full px-6 py-4 z-10 pt-[60px] pl-[60px]  pr-[60px] ">
         <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image

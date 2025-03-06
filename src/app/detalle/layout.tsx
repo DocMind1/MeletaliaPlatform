@@ -1,6 +1,5 @@
 "use client";
 import React, { ReactNode } from "react";
-import SearchBar from "../components/SearchBar";
 import { AuthProvider } from "../context/AuthContext";
 
 interface DetalleLayoutProps {
@@ -10,7 +9,7 @@ interface DetalleLayoutProps {
 export default function DetalleLayout({ children }: DetalleLayoutProps) {
   return (
     <>
-      <SearchBar />
+    
       <AuthProvider>{children}</AuthProvider>
     </>
   );

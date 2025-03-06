@@ -1,14 +1,13 @@
 "use client";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext, useAuth } from "../context/AuthContext";
+import {  useAuth } from "../context/AuthContext";
 import {
   createProperty,
   uploadDashboardImages,
   getProperties,
   deleteProperty,
   updateProperty,
-  STRAPI_URL,
 } from "../../../userService/userService";
 
 

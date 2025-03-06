@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Header from "../app/components/Header";
-import Footer from "../app/components/Footer";
-import { AuthProvider } from "./context/AuthContext"; // Ajusta la ruta si es necesario
+import { AuthProvider } from "./context/AuthContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,19 +15,20 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Maletalia",
-  description: "Casas y alojamientos rurales ",
+  description: "Casas y alojamientos rurales",
+  icons: "/favicon.ico",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode; }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
-          <Header />
           {children}
-          <Footer />
         </AuthProvider>
       </body>
     </html>
   );
 }
+
+
