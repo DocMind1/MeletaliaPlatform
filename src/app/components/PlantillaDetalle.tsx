@@ -1,5 +1,5 @@
 "use client";
-import { useParams } from "next/navigation"; // Cambia useRouter por useParams
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import DatePicker from "react-datepicker";
@@ -30,12 +30,13 @@ interface PropertyDetail {
 }
 
 export default function DetallePropiedad() {
-  const params = useParams(); // Usa useParams para obtener el id
-  const id = params?.id; // El id viene como params.id
+  const router = useRouter();
+  const { id } = router.query;
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0); // Movido al inicio
 
   const blockedDates = ["2023-12-25", "2023-12-31", "2024-01-01"];
   const isDateBlocked = (date: Date): boolean => {
@@ -44,17 +45,14 @@ export default function DetallePropiedad() {
   };
 
   useEffect(() => {
-    const fetchProperty = async () => {
-      if (!id) return;
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/propiedades/${id}?populate=*`);
-        const data = await res.json();
-        setProperty(data.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchProperty();
+    if (id) {
+      fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/propiedades/${id}?populate=*`)
+        .then((res) => res.json())
+        .then((data) => {
+          setProperty(data.data);
+        })
+        .catch((err) => console.error(err));
+    }
   }, [id]);
 
   if (!property) return <div>Cargando...</div>;
@@ -69,7 +67,6 @@ export default function DetallePropiedad() {
         }))
       : [{ src: "/images/placeholder.jpg", alt: Titulo }];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
   const prevImage = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   const nextImage = () => setCurrentIndex((prev) => (prev + 1) % images.length);
   const openModal = () => setIsModalOpen(true);
