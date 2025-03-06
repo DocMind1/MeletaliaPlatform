@@ -5,13 +5,23 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { searchProperties, SearchPropertyFilters } from "../../../userService/userService";
 
+// Interfaz para las propiedades
+interface Property {
+  id: number;
+  Titulo: string;
+  Descripcion: string;
+  Precio: number;
+  Direccion: string;
+  Imagenes: { url: string }[] | null;
+}
+
 const SearchBar: React.FC = () => {
   const [destination, setDestination] = useState("");
   const [checkIn, setCheckIn] = useState<Date | null>(null);
   const [checkOut, setCheckOut] = useState<Date | null>(null);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]); // Cambia any[] por Property[]
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
