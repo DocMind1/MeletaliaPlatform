@@ -11,7 +11,6 @@ import {
   STRAPI_URL,
 } from "../../../userService/userService";
 
-import ReservationsDashboard from "../components/ReservationsDashboard";
 
 // Interfaz Property actualizada con fechas de disponibilidad
 interface Property {

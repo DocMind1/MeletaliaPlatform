@@ -1,4 +1,37 @@
 // userService.ts
+
+interface Servicios {
+  WiFi: boolean;
+  Parking: boolean;
+  AdaptadoMovilidadReducida: boolean;
+  Piscina: boolean;
+  Gimnasio: boolean;
+  Spa: boolean;
+  Restaurante: boolean;
+  Bar: boolean;
+  Lavanderia: boolean;
+  Recepcion24h: boolean;
+  TransporteAeropuerto: boolean;
+  ServicioHabitaciones: boolean;
+  AdmiteMascotas: boolean;
+  ZonasFumadores: boolean;
+  AireAcondicionadoComun: boolean;
+  CalefaccionComun: boolean;
+  SalaConferencias: boolean;
+  AreaJuegosInfantiles: boolean;
+  Biblioteca: boolean;
+  Jardin: boolean;
+}
+
+export interface SearchPropertyFilters {
+  city?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  availableFrom?: string;
+  availableTo?: string;
+  services?: Partial<Servicios>;
+}
+
 export interface RegisterBody {
   username: string;
   email: string;
@@ -78,6 +111,63 @@ export const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
 
 
 
+/////////////////BUSQUEDAS  .... 
+
+export async function searchProperties(filters: SearchPropertyFilters) {
+  try {
+    let url = `${STRAPI_URL}/api/propiedades?populate=*`;
+
+    if (filters.city) {
+      url += `&filters[Direccion][$containsi]=${encodeURIComponent(filters.city)}`;
+    }
+    if (filters.minPrice) {
+      url += `&filters[Precio][$gte]=${filters.minPrice}`;
+    }
+    if (filters.maxPrice) {
+      url += `&filters[Precio][$lte]=${filters.maxPrice}`;
+    }
+    if (filters.availableFrom) {
+      url += `&filters[DisponibleDesde][$gte]=${filters.availableFrom}`;
+    }
+    if (filters.availableTo) {
+      url += `&filters[DisponibleHasta][$lte]=${filters.availableTo}`;
+    }
+    if (filters.services) {
+      Object.entries(filters.services).forEach(([key, value]) => {
+        if (value) {
+          url += `&filters[Servicios][${key}][$eq]=true`;
+        }
+      });
+    }
+
+    console.log("Search URL:", url);
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log("Raw API response:", result);
+
+    // Asegurarnos de que siempre devolvemos un array válido
+    const properties = Array.isArray(result.data)
+      ? result.data
+      : (Array.isArray(result) ? result : []);
+    
+    console.log("Processed properties:", properties);
+    return { ok: true, properties };
+  } catch (error) {
+    console.error("Error in searchProperties:", error);
+    const errorMessage = error instanceof Error ? error.message : "Error en la conexión";
+    return { ok: false, error: errorMessage };
+  }
+}
 ////////////////////////// PÁGINA PRINCIPAL 
 export async function getAllProperties() {
   try {
