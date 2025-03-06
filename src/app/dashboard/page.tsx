@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {  useAuth } from "../context/AuthContext";
 import {
   createProperty,
@@ -93,8 +92,8 @@ interface Property {
 }
 
 export default function Dashboard() {
-  const { user, setUser } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
+
 
   const [properties, setProperties] = useState<Property[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -165,6 +164,22 @@ export default function Dashboard() {
   const jwt = user?.jwt || null;
   const userId = user ? parseInt(user.id.toString(), 10) : 0;
   
+
+  const loadProperties = async () => {
+    setIsLoadingProperties(true);
+    const result = await getProperties(jwt, userId);
+    if (result.ok) {
+      setProperties(result.properties || []);
+    } else {
+      setMensaje("Error al cargar propiedades");
+      setMensajeType("error");
+      setProperties([]);
+    }
+    setIsLoadingProperties(false);
+  };
+
+
+
   useEffect(() => {
     if (jwt && userId) {
       loadProperties();
@@ -181,19 +196,7 @@ export default function Dashboard() {
     }
   }, [mensaje]);
 
-  const loadProperties = async () => {
-    setIsLoadingProperties(true);
-    const result = await getProperties(jwt, userId);
-    if (result.ok) {
-      setProperties(result.properties || []);
-    } else {
-      setMensaje("Error al cargar propiedades");
-      setMensajeType("error");
-      setProperties([]);
-    }
-    setIsLoadingProperties(false);
-  };
-
+ 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
