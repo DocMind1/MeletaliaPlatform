@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation"; // Cambia useRouter por useParams
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import DatePicker from "react-datepicker";
@@ -18,7 +18,6 @@ import {
   Moon,
 } from "lucide-react";
 
-// Interface para el detalle de la propiedad
 interface PropertyDetail {
   id: number;
   attributes: {
@@ -27,19 +26,17 @@ interface PropertyDetail {
     Direccion: string;
     Precio: number;
     Imagenes?: Array<{ url: string }>;
-    // Agrega otros campos si lo requieres
   };
 }
 
 export default function DetallePropiedad() {
-  const router = useRouter();
-  const { id } = router.query;
+  const params = useParams(); // Usa useParams para obtener el id
+  const id = params?.id; // El id viene como params.id
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Ejemplo de fechas bloqueadas
   const blockedDates = ["2023-12-25", "2023-12-31", "2024-01-01"];
   const isDateBlocked = (date: Date): boolean => {
     const formatted = moment(date).format("YYYY-MM-DD");
@@ -47,15 +44,17 @@ export default function DetallePropiedad() {
   };
 
   useEffect(() => {
-    if (id) {
-      fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/propiedades/${id}?populate=*`)
-        .then((res) => res.json())
-        .then((data) => {
-          // Ajusta según la estructura de respuesta de tu API (data.data)
-          setProperty(data.data);
-        })
-        .catch((err) => console.error(err));
-    }
+    const fetchProperty = async () => {
+      if (!id) return;
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/propiedades/${id}?populate=*`);
+        const data = await res.json();
+        setProperty(data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchProperty();
   }, [id]);
 
   if (!property) return <div>Cargando...</div>;
@@ -71,12 +70,8 @@ export default function DetallePropiedad() {
       : [{ src: "/images/placeholder.jpg", alt: Titulo }];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const prevImage = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
+  const prevImage = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  const nextImage = () => setCurrentIndex((prev) => (prev + 1) % images.length);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const handleConfirmDates = () => {
@@ -105,13 +100,13 @@ export default function DetallePropiedad() {
             onClick={prevImage}
             className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700"
           >
-            &#8249;
+            ‹
           </button>
           <button
             onClick={nextImage}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700"
           >
-            &#8250;
+            ›
           </button>
         </div>
         <div className="bg-white p-4 rounded-lg flex flex-col justify-between">
