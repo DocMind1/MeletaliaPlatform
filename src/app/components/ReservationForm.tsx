@@ -50,9 +50,9 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
         const propertyOwnerId = propertyData?.data?.attributes?.users_permissions_user?.data?.id;
         console.log("Property owner ID:", propertyOwnerId, "User ID:", user.id);
         setIsOwner(propertyOwnerId === user.id);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching property:", err);
-        setError(err.message || "Error al verificar la propiedad");
+        setError(err instanceof Error ? err.message :"Error al verificar la propiedad");
       }
     };
 
@@ -114,8 +114,8 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
 
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Error al crear la reserva");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message :"Error al crear la reserva");
     }
   };
 
