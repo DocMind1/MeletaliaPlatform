@@ -17,6 +17,21 @@ interface ReservationEvent {
   estado: string;
 }
 
+interface Property {
+  id: number;
+  attributes: { Titulo: string };
+}
+
+interface Reservation {
+  id: number;
+  attributes: {
+    propiedad: { data: { attributes: { Titulo: string } } };
+    fechaInicio: string;
+    fechaFin: string;
+    estado: string;
+  };
+}
+
 export default function ReservationsDashboard() {
   const { user } = useAuth();
   const [reservations, setReservations] = useState<ReservationEvent[]>([]);
@@ -24,7 +39,6 @@ export default function ReservationsDashboard() {
   const [mensajeType, setMensajeType] = useState<"success" | "error" | "">("");
 
   useEffect(() => {
-    // Verificar si user existe antes de hacer la solicitud
     if (!user || !user.id || !user.jwt) {
       setMensaje("Debes iniciar sesión para ver las reservas.");
       setMensajeType("error");
@@ -38,7 +52,7 @@ export default function ReservationsDashboard() {
     })
       .then((res) => res.json())
       .then(async (data) => {
-        const propertyIds = data.data.map((prop: any) => prop.id);
+        const propertyIds = data.data.map((prop: Property) => prop.id);
 
         const reservationsResponse = await fetch(
           `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas?filters[propiedad][$in]=${propertyIds.join(",")}&populate=*`,
@@ -50,7 +64,7 @@ export default function ReservationsDashboard() {
         );
         const reservationsData = await reservationsResponse.json();
 
-        const events = reservationsData.data.map((reserva: any) => ({
+        const events = reservationsData.data.map((reserva: Reservation) => ({
           id: reserva.id,
           title: `Reserva para ${reserva.attributes.propiedad.data.attributes.Titulo} (${reserva.attributes.estado})`,
           start: new Date(reserva.attributes.fechaInicio),
@@ -61,10 +75,9 @@ export default function ReservationsDashboard() {
 
         setReservations(events);
       })
-      .catch((err) => {
+      .catch(() => {
         setMensaje("Error al cargar las reservas.");
         setMensajeType("error");
-        console.error(err);
       });
   }, [user]);
 
@@ -104,7 +117,7 @@ export default function ReservationsDashboard() {
         setMensaje(result.error?.message || `Error al ${action === "confirm" ? "confirmar" : "cancelar"} la reserva.`);
         setMensajeType("error");
       }
-    } catch (error) {
+    } catch {
       setMensaje("Error en la conexión al servidor.");
       setMensajeType("error");
     }
