@@ -7,7 +7,6 @@ interface User {
   id: number;
   jwt: string;
   role?: { id: number };
-  [key: string]: any; // Para permitir propiedades adicionales
 }
 
 // Definir la interfaz para el contexto
