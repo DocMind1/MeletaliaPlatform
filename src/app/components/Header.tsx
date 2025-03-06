@@ -65,7 +65,7 @@ const Header: React.FC = () => {
                             <Link href="/dashboard">Dashboard</Link>
                           </li>
                           <li className="px-4 py-2 hover:bg-gray-100">
-                            <Link href="/reservas">Mis Reservas Recibidas</Link>
+                            <Link href="/reservas">Mis   Reservas Recibidas</Link>
                           </li>
                         </>
                       )}
