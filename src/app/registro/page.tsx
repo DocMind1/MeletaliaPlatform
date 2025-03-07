@@ -33,7 +33,7 @@ export default function DetallePropiedad() {
   useAuth(); // Mantenemos el hook por posibles efectos secundarios
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [occupiedDates, setOccupiedDates] = useState<Date[]>([]); // Restaurado para funcionalidad de fechas ocupadas
+  const [occupiedDates, setOccupiedDates] = useState<Date[]>([]);
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,7 +63,6 @@ export default function DetallePropiedad() {
         const fetchedReservations: Reservation[] = data.data || [];
         setReservations(fetchedReservations);
 
-        // Calculamos las fechas ocupadas a partir de las reservas
         const occupied = fetchedReservations.flatMap((reserva) => {
           const start = moment(reserva.attributes.fechaInicio);
           const end = moment(reserva.attributes.fechaFin);
@@ -87,15 +86,21 @@ export default function DetallePropiedad() {
     }
   }, [startDate, endDate]);
 
+  const images = useMemo(() => {
+    if (!property || !property.attributes.Imagenes) {
+      return [{ src: "/images/placeholder.jpg", alt: "Propiedad sin título" }];
+    }
+    return property.attributes.Imagenes.length > 0
+      ? property.attributes.Imagenes.map((img: { url: string }) => ({
+          src: img.url,
+          alt: property.attributes.Titulo,
+        }))
+      : [{ src: "/images/placeholder.jpg", alt: property.attributes.Titulo }];
+  }, [property]);
+
   if (!property) return <div>Cargando...</div>;
 
   const { Titulo, Descripcion, Direccion, Precio, Imagenes } = property.attributes;
-
-  const images = useMemo(() => {
-    return Imagenes && Imagenes.length > 0
-      ? Imagenes.map((img: { url: string }) => ({ src: img.url, alt: Titulo }))
-      : [{ src: "/images/placeholder.jpg", alt: Titulo }];
-  }, [Imagenes, Titulo]);
 
   const isDateBlocked = (date: Date): boolean => {
     return reservations.some((reserva) => {
