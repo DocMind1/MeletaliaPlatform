@@ -1,14 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import moment from "moment";
 import {
- 
   Accessibility,
   Bell,
- 
   Wifi,
   Car,
   Users,
@@ -33,24 +31,77 @@ import { useAuth } from "../../context/AuthContext";
 import ReservationForm from "../../components/ReservationForm";
 import Header from "@/app/components/Header";
 
+interface Property {
+  id: number;
+  documentId?: string;
+  Titulo: string;
+  Descripcion: string;
+  Direccion: string;
+  Precio: number;
+  Imagenes?: Array<{ url: string }>;
+  DisponibleDesde?: string;
+  DisponibleHasta?: string;
+  Servicios?: {
+    WiFi?: boolean;
+    Parking?: boolean;
+    AdaptadoMovilidadReducida?: boolean;
+    Piscina?: boolean;
+    Gimnasio?: boolean;
+    Spa?: boolean;
+    Restaurante?: boolean;
+    Bar?: boolean;
+    Lavanderia?: boolean;
+    Recepcion24h?: boolean;
+    AdmiteMascotas?: boolean;
+    Jardin?: boolean;
+  };
+  Desayuno?: string[];
+  Caracteristicas?: {
+    Terraza?: boolean;
+    VistasPanoramicas?: boolean;
+    AireAcondicionado?: boolean;
+    Calefaccion?: boolean;
+    Minibar?: boolean;
+    TVPantallaPlana?: boolean;
+    CajaFuerte?: boolean;
+    Escritorio?: boolean;
+    Banera?: boolean;
+    Ducha?: boolean;
+    SecadorPelo?: boolean;
+    ArticulosAseo?: boolean;
+    Armario?: boolean;
+    Insonorizacion?: boolean;
+    Cafetera?: boolean;
+    Nevera?: boolean;
+    CamaExtraGrande?: boolean;
+  };
+  PuntosFuertes?: string;
+}
+
 export default function DetallePropiedad() {
   const { id } = useParams();
   const { user } = useAuth();
 
-  const [property, setProperty] = useState<any | null>(null);
+  const [property, setProperty] = useState<Property | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [occupiedDates, setOccupiedDates] = useState<Date[]>([]); // Fechas ocupadas
+  const [occupiedDates, setOccupiedDates] = useState<Date[]>([]);
 
-  // Convertir id a string y manejar el caso undefined
-  const propertyId = Array.isArray(id) ? id[0] : id; // Si id es un array, tomamos el primer elemento
+  const propertyId = Array.isArray(id) ? id[0] : id;
 
-  // Si id es undefined, no renderizamos el componente
-  if (!propertyId) {
-    return <div className="p-4">Error: ID de propiedad no encontrado.</div>;
-  }
+  // Definimos images con useMemo antes de los useEffect
+  const images = useMemo(() => {
+    if (!property) {
+      return [{ src: "/images/placeholder.jpg", alt: "Propiedad sin título" }];
+    }
+    return property.Imagenes && property.Imagenes.length > 0
+      ? property.Imagenes.map((img: { url: string }) => ({
+          src: img.url,
+          alt: property.Titulo,
+        }))
+      : [{ src: "/images/placeholder.jpg", alt: property.Titulo }];
+  }, [property]);
 
-  // Cargar la propiedad
   useEffect(() => {
     if (!propertyId) return;
     const finalURL = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/propiedades/${propertyId}?populate=*`;
@@ -71,7 +122,6 @@ export default function DetallePropiedad() {
       .catch((err) => console.error("Error fetching property:", err));
   }, [propertyId]);
 
-  // Cargar fechas ocupadas (reservas confirmadas)
   useEffect(() => {
     if (!propertyId) return;
     fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas?filters[propiedad][$eq]=${propertyId}&populate=*`)
@@ -97,17 +147,6 @@ export default function DetallePropiedad() {
       });
   }, [propertyId]);
 
-  // Extraer imágenes después de que property esté disponible
-  const images = property
-    ? (property.attributes || property).Imagenes && (property.attributes || property).Imagenes.length > 0
-      ? (property.attributes || property).Imagenes.map((img: any) => ({
-          src: img.url,
-          alt: (property.attributes || property).Titulo,
-        }))
-      : [{ src: "/images/placeholder.jpg", alt: (property.attributes || property).Titulo }]
-    : [];
-
-  // Hook para el temporizador del carrusel
   useEffect(() => {
     if (!images || images.length <= 1) return;
 
@@ -117,6 +156,27 @@ export default function DetallePropiedad() {
 
     return () => clearInterval(interval);
   }, [images]);
+
+  if (!propertyId) {
+    return <div className="p-4">Error: ID de propiedad no encontrado.</div>;
+  }
+
+  if (!property) {
+    return <div className="p-4">Cargando...</div>;
+  }
+
+  const {
+    Titulo,
+    Descripcion,
+    Direccion,
+    Precio,
+    DisponibleDesde,
+    DisponibleHasta,
+    Servicios,
+    Desayuno,
+    Caracteristicas,
+    PuntosFuertes,
+  } = property;
 
   const prevImage = () => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
@@ -129,7 +189,6 @@ export default function DetallePropiedad() {
   const closeModal = () => setIsModalOpen(false);
 
   const handleReservationSuccess = () => {
-    // Recargar fechas ocupadas después de una reserva exitosa
     fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas?filters[propiedad][$eq]=${propertyId}&populate=*`)
       .then((res) => res.json())
       .then((data) => {
@@ -153,32 +212,9 @@ export default function DetallePropiedad() {
       });
   };
 
-  if (!property) {
-    return <div className="p-4">Cargando...</div>;
-  }
-
-  const {
-    Titulo,
-    Descripcion,
-    Direccion,
-    Precio,
- 
-    DisponibleDesde,
-    DisponibleHasta,
-    Servicios,
-    Desayuno,
-    Caracteristicas,
-    PuntosFuertes,
-  } = property.attributes || property;
-
   return (
-  
- 
-   
     <div className="max-w-6xl mx-auto pl-4 pr-4">
-     
-     <Header/>
-     
+      <Header />
       <h1 className="text-2xl font-bold mt-4">{Titulo}</h1>
       <p className="text-sm text-gray-600 flex items-center gap-2 mt-2">
         <span className="text-gray-800">📍</span>
@@ -454,14 +490,13 @@ export default function DetallePropiedad() {
 
       {isModalOpen && (
         <ReservationForm
-          propertyId={propertyId} // Ahora propertyId es garantizadamente string
-          availableFrom={DisponibleDesde}
-          availableUntil={DisponibleHasta}
+          propertyId={propertyId}
+          availableFrom={DisponibleDesde || ""}
+          availableUntil={DisponibleHasta || ""}
           onClose={closeModal}
           onSuccess={handleReservationSuccess}
         />
       )}
     </div>
-    
   );
 }
