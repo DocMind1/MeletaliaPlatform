@@ -211,7 +211,7 @@ export default function Registro() {
       } else {
         setMensaje("Error al actualizar datos: " + updateResult.error);
       }
-    } catch (error) {
+    } catch  {
       setMensaje("Error al completar el registro, intenta de nuevo.");
     }
     setLoading(false);
