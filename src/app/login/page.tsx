@@ -1,14 +1,15 @@
 "use client";
-import React, { useState, useContext } from "react";
+
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "../context/AuthContext"; // Ajusta la ruta según tu estructura
+import { useAuth } from "../context/AuthContext"; // Usamos useAuth en lugar de useContext
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [mensaje, setMensaje] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { setUser } = useContext(AuthContext);
+  const { setUser } = useAuth(); // Cambiamos a useAuth()
 
   const fetchUserRole = async (jwt: string) => {
     try {
