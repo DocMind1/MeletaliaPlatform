@@ -5,14 +5,46 @@ import { useAuth } from "../context/AuthContext";
 import moment from "moment";
 import Link from "next/link";
 
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  countryCode?: string;
+  phone?: string;
+}
+
+interface Property {
+  id: number;
+  attributes?: {
+    Titulo: string;
+  };
+  Titulo?: string; // Para casos donde no hay attributes
+}
+
+interface Reservation {
+  id: number;
+  estado: string;
+  fechaInicio: string;
+  fechaFin: string;
+  createdAt: string;
+  propiedad?: Property;
+  usuario?: User;
+}
+
+interface AuthUser {
+  id: number;
+  jwt: string;
+  role?: { id: number };
+}
+
 const ReservasPage: React.FC = () => {
-  const { user } = useAuth();
-  const [reservas, setReservas] = useState<any[]>([]);
+  const { user } = useAuth() as { user: AuthUser | null };
+  const [reservas, setReservas] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState<boolean>(false);
-  const [editando, setEditando] = useState<{ [key: number]: boolean }>({}); // Estado de edición
-  const [estadoCambios, setEstadoCambios] = useState<{ [key: number]: string }>({}); // Estado temporal
+  const [editando, setEditando] = useState<{ [key: number]: boolean }>({});
+  const [estadoCambios, setEstadoCambios] = useState<{ [key: number]: string }>({});
 
   useEffect(() => {
     const fetchReservas = async () => {
@@ -58,7 +90,7 @@ const ReservasPage: React.FC = () => {
           const propiedadesData = await propiedadesResponse.json();
           console.log(`Propiedades response: ${JSON.stringify(propiedadesData)}`);
 
-          let propiedades = [];
+          let propiedades: Property[] = [];
           if (Array.isArray(propiedadesData)) {
             propiedades = propiedadesData;
           } else if (propiedadesData?.data) {
@@ -76,7 +108,9 @@ const ReservasPage: React.FC = () => {
             return;
           }
 
-          const propiedadIds = propiedades.map((prop: any) => prop.id || (prop.attributes && prop.id)).filter((id: any) => id !== undefined);
+          const propiedadIds = propiedades
+            .map((prop) => prop.id || (prop.attributes && prop.id))
+            .filter((id): id is number => id !== undefined);
           console.log(`Property IDs: ${propiedadIds}`);
 
           if (propiedadIds.length === 0) {
@@ -86,7 +120,7 @@ const ReservasPage: React.FC = () => {
             return;
           }
 
-          const filterParams = propiedadIds.map((id: number, index: number) => `filters[propiedad][$in][${index}]=${id}`).join("&");
+          const filterParams = propiedadIds.map((id, index) => `filters[propiedad][$in][${index}]=${id}`).join("&");
           url = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas?${filterParams}&populate[propiedad]=true&populate[usuario][fields][0]=id&populate[usuario][fields][1]=username&populate[usuario][fields][2]=email&populate[usuario][fields][3]=countryCode&populate[usuario][fields][4]=phone`;
           console.log(`URL de reservas: ${url}`);
         } else {
@@ -107,14 +141,14 @@ const ReservasPage: React.FC = () => {
         const data = await response.json();
         console.log(`Reservations response: ${JSON.stringify(data)}`);
 
-        const fetchedReservas = Array.isArray(data) ? data : (data.data || []);
+        const fetchedReservas: Reservation[] = Array.isArray(data) ? data : (data.data || []);
         console.log(`Reservas procesadas: ${JSON.stringify(fetchedReservas)}`);
 
         setReservas(fetchedReservas);
         setLoading(false);
-      } catch (err: any) {
-        console.log(`Error en fetchReservas: ${err.message}`);
-        setError(err.message || "Error al cargar las reservas");
+      } catch (err) {
+        console.log(`Error en fetchReservas: ${(err as Error).message}`);
+        setError((err as Error).message || "Error al cargar las reservas");
         setReservas([]);
         setLoading(false);
       }
@@ -190,16 +224,16 @@ const ReservasPage: React.FC = () => {
           reserva.id === reservaId ? { ...reserva, estado: newStatus } : reserva
         )
       );
-      setEditando((prev) => ({ ...prev, [reservaId]: false })); // Desactivar edición tras grabar
+      setEditando((prev) => ({ ...prev, [reservaId]: false }));
       setEstadoCambios((prev) => {
         const newCambios = { ...prev };
         delete newCambios[reservaId];
         return newCambios;
       });
       setError(null);
-    } catch (err: any) {
-      console.log(`Error en updateReservationStatus: ${err.message}`);
-      setError(err.message || "Error al actualizar el estado de la reserva");
+    } catch (err) {
+      console.log(`Error en updateReservationStatus: ${(err as Error).message}`);
+      setError((err as Error).message || "Error al actualizar el estado de la reserva");
     }
   };
 
@@ -225,7 +259,7 @@ const ReservasPage: React.FC = () => {
         <p>{isOwner ? "No tienes reservas recibidas." : "No has realizado ninguna reserva."}</p>
       ) : (
         <div className="grid gap-4">
-          {reservas.map((reserva: any) => (
+          {reservas.map((reserva) => (
             <div
               key={reserva.id}
               className="border p-4 rounded-lg shadow-md flex justify-between items-center"
@@ -236,7 +270,7 @@ const ReservasPage: React.FC = () => {
                     href={`/detalle/${reserva.propiedad?.id || reserva.id}`}
                     className="text-blue-500 hover:underline"
                   >
-                    {reserva.propiedad?.Titulo || "N/A"}
+                    {reserva.propiedad?.Titulo || reserva.propiedad?.attributes?.Titulo || "N/A"}
                   </Link>{" "}
                   - {isOwner ? (
                     <>
