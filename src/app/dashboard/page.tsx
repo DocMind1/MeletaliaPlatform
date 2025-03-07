@@ -278,10 +278,10 @@ export default function Dashboard() {
     e.preventDefault();
     setLoading(true);
     setMensaje("");
-
+  
     try {
       let imageIds: number[] | undefined;
-
+  
       if (formData.imagenes) {
         const uploadResult = await uploadDashboardImages(
           Array.from(formData.imagenes),
@@ -296,12 +296,12 @@ export default function Dashboard() {
           return;
         }
       }
-
+  
       // Convertir Desayuno de objeto booleano a array de strings
       const desayunoArray = Object.entries(formData.Desayuno)
-        .filter(([_, value]) => value)
+        .filter(([, value]) => value) // Corrección: omitimos nombrar la clave
         .map(([key]) => (key === "SinGluten" ? "Sin Gluten" : key));
-
+  
       const propertyData = {
         Titulo: formData.Titulo,
         Descripcion: formData.Descripcion,
@@ -332,11 +332,11 @@ export default function Dashboard() {
         Caracteristicas: formData.Caracteristicas,
         PuntosFuertes: formData.PuntosFuertes,
       };
-
+  
       const result = editingProperty
         ? await updateProperty(editingProperty.id, propertyData, jwt)
         : await createProperty(propertyData, jwt);
-
+  
       if (result.ok) {
         setMensaje(
           editingProperty
