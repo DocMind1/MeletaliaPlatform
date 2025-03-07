@@ -220,6 +220,8 @@ export default function DetallePropiedad() {
       });
   };
 
+  console.log(occupiedDates);
+
   return (
     <div className="max-w-6xl mx-auto pl-4 pr-4">
       <Header />
