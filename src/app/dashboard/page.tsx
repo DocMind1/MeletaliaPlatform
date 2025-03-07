@@ -8,6 +8,8 @@ import {
   deleteProperty,
   updateProperty,
 } from "../../../userService/userService";
+import Image from "next/image";
+import Link from "next/link";
 
 interface Property {
   id: number;
@@ -367,8 +369,24 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-10"></header>
+    <div className="container mx-auto p-4">
+
+      <Link href="/" className="flex items-center gap-2">
+        <Image
+          src="/images/logo.png"
+          alt="Logo"
+          width={42}
+          height={42}
+          className="object-contain"
+        />
+        <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md ">
+          Maletalia
+        </span>
+        <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md">
+          .net
+        </span>
+      </Link>
+
       <main className="max-w-6xl mx-auto pt-24 pb-6 px-6">
         {mensaje && (
           <div
@@ -720,8 +738,13 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+
         <div className="mt-8">
+
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+
+
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">Mis Propiedades</h2>
             <button
               onClick={() => {

@@ -4,6 +4,9 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import moment from "moment";
 import Link from "next/link";
+import Image from "next/image";
+
+
 
 interface User {
   id: number;
@@ -251,6 +254,24 @@ const ReservasPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
+
+      <Link href="/" className="flex items-center gap-2">
+        <Image
+          src="/images/logo.png"
+          alt="Logo"
+          width={42}
+          height={42}
+          className="object-contain"
+        />
+        <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md ">
+          Maletalia
+        </span>
+        <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md">
+          .net
+        </span>
+      </Link>
+
+
       <h1 className="text-2xl font-bold mb-4">
         {isOwner ? "Mis Reservas Recibidas" : "Mis Reservas"}
       </h1>

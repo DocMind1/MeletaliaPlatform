@@ -1,27 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { Home, PlusCircle, Calendar, User } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useAuth } from "../context/AuthContext"; // Ajusta la ruta según tu estructura
+import { Home, PlusCircle, Calendar, LogOut, Search } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAuth(); // Obtener el usuario autenticado
+  const { user, setUser } = useAuth();
+  const router = useRouter();
 
-  // Si no hay usuario, no mostrar el Sidebar (o mostrar una versión mínima)
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem("userSession"); // Limpiar el almacenamiento local
+    setUser(null); // Limpiar el estado del usuario en el contexto
+    router.push("/"); // Redirigir a la página de inicio
+  };
+
+  // Si no hay usuario, mostrar una versión mínima del Sidebar
   if (!user) {
     return (
-      <aside className="w-16 bg-gray-100 border-r border-gray-200 flex flex-col items-center py-6">
-        <Link href="/" className="mb-6" title="Inicio">
+      <aside className="w-16 bg-white border-r border-gray-200 flex flex-col items-center py-6">
+        <Link href="/" className="mb-6 relative" title="Inicio">
           <div
             className={`p-3 rounded-full ${
               pathname === "/"
-                ? "bg-blue-600 text-white"
+                ? "bg-gray text-white"
                 : "text-gray-600 hover:bg-gray-200"
             } transition-colors duration-200`}
           >
             <Home size={24} />
+            {/* Círculo de notificación rojo */}
+            <span className="absolute top-0 right-0 w-5 h-5 bg-gray-800  rounded-full flex items-center justify-center text-white text-xs">
+              1
+            </span>
           </div>
         </Link>
       </aside>
@@ -29,30 +41,19 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-16 bg-gray-100 border-r border-gray-200 flex flex-col items-center py-6">
-      {/* Ícono para regresar a la raíz (/) */}
+    <aside className="w-16 bg-white border-r border-gray-200 flex flex-col items-center py-6">
+
+
+      {/* Ícono para Inicio (/) */}
       <Link href="/" className="mb-6" title="Inicio">
         <div
           className={`p-3 rounded-full ${
             pathname === "/"
-              ? "bg-blue-600 text-white"
+              ? "bg-gray-800  text-white"
               : "text-gray-600 hover:bg-gray-200"
           } transition-colors duration-200`}
         >
           <Home size={24} />
-        </div>
-      </Link>
-
-      {/* Ícono para Perfil (/perfil) - Todos los usuarios */}
-      <Link href="/perfil" className="mb-6" title="Perfil">
-        <div
-          className={`p-3 rounded-full ${
-            pathname === "/perfil"
-              ? "bg-blue-600 text-white"
-              : "text-gray-600 hover:bg-gray-200"
-          } transition-colors duration-200`}
-        >
-          <User size={24} />
         </div>
       </Link>
 
@@ -62,7 +63,7 @@ export default function Sidebar() {
           <div
             className={`p-3 rounded-full ${
               pathname === "/dashboard"
-                ? "bg-blue-600 text-white"
+                ? "bg-gray-800  text-white"
                 : "text-gray-600 hover:bg-gray-200"
             } transition-colors duration-200`}
           >
@@ -81,7 +82,7 @@ export default function Sidebar() {
           <div
             className={`p-3 rounded-full ${
               pathname === "/reservas"
-                ? "bg-blue-600 text-white"
+                ? "bg-gray-800  text-white"
                 : "text-gray-600 hover:bg-gray-200"
             } transition-colors duration-200`}
           >
@@ -89,6 +90,15 @@ export default function Sidebar() {
           </div>
         </Link>
       )}
+
+      {/* Ícono para Logout */}
+      <button
+        onClick={handleLogout}
+        className="mt-auto p-3 rounded-full text-gray-600 hover:bg-gray-200 transition-colors duration-200"
+        title="Cerrar Sesión"
+      >
+        <LogOut size={24} />
+      </button>
     </aside>
   );
 }
