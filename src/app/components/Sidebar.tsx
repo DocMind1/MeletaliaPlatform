@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, PlusCircle, Calendar, LogOut, Search } from "lucide-react";
+import { Home, PlusCircle, Calendar, LogOut } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 

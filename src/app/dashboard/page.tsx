@@ -185,15 +185,15 @@ export default function Dashboard() {
     setIsLoadingProperties(true);
     const result = await getProperties(jwt, userId);
     if (result.ok) {
-      // Convertir Desayuno de string[] a objeto booleano para el frontend
-      const propertiesWithDesayunoObj = result.properties.map((prop: any) => ({
+      const propertiesWithDesayunoObj = result.properties.map((prop: Property) => ({
         ...prop,
         Desayuno: {
-          Continental: prop.Desayuno?.includes("Continental") || false,
-          Vegetariano: prop.Desayuno?.includes("Vegetariano") || false,
-          Vegano: prop.Desayuno?.includes("Vegano") || false,
-          SinGluten: prop.Desayuno?.includes("Sin Gluten") || false,
-          Buffet: prop.Desayuno?.includes("Buffet") || false,
+          // Aseguramos que includes se use solo si Desayuno es array
+          Continental: Array.isArray(prop.Desayuno) && prop.Desayuno.includes("Continental") || false,
+          Vegetariano: Array.isArray(prop.Desayuno) && prop.Desayuno.includes("Vegetariano") || false,
+          Vegano: Array.isArray(prop.Desayuno) && prop.Desayuno.includes("Vegano") || false,
+          SinGluten: Array.isArray(prop.Desayuno) && prop.Desayuno.includes("Sin Gluten") || false,
+          Buffet: Array.isArray(prop.Desayuno) && prop.Desayuno.includes("Buffet") || false,
         },
       }));
       setProperties(propertiesWithDesayunoObj);
@@ -204,6 +204,13 @@ export default function Dashboard() {
     }
     setIsLoadingProperties(false);
   };
+
+
+
+
+
+
+
 
   useEffect(() => {
     if (jwt && userId) {
@@ -247,7 +254,7 @@ export default function Dashboard() {
       setFormData({ ...formData, [name]: value });
     }
   };
-
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = e.target.files;
