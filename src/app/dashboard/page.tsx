@@ -372,9 +372,8 @@ export default function Dashboard() {
       <main className="max-w-6xl mx-auto pt-24 pb-6 px-6">
         {mensaje && (
           <div
-            className={`fixed top-20 right-6 px-6 py-3 rounded-md shadow-lg text-white transition-opacity duration-300 ${
-              mensajeType === "success" ? "bg-green-500" : "bg-red-500"
-            }`}
+            className={`fixed top-20 right-6 px-6 py-3 rounded-md shadow-lg text-white transition-opacity duration-300 ${mensajeType === "success" ? "bg-green-500" : "bg-red-500"
+              }`}
           >
             {mensaje}
           </div>
@@ -631,20 +630,18 @@ export default function Dashboard() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`flex-1 py-2 rounded-md flex justify-center items-center ${
-                      loading ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-                    } text-white transition duration-200`}
+                    className={`flex-1 py-2 rounded-md flex justify-center items-center ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                      } text-white transition duration-200`}
                   >
                     {loading
                       ? "Guardando..."
                       : editingProperty
-                      ? "Actualizar Propiedad"
-                      : "Crear Propiedad"}
+                        ? "Actualizar Propiedad"
+                        : "Crear Propiedad"}
                   </button>
                   <button
-                    type="button"
                     onClick={() => {
-                      setShowModal(false);
+                      setShowModal(true);
                       setEditingProperty(null);
                       setFormData({
                         Titulo: "",
@@ -714,9 +711,9 @@ export default function Dashboard() {
                         DisponibleHasta: "",
                       });
                     }}
-                    className="flex-1 py-2 rounded-md bg-gray-300 text-gray-700 hover:bg-gray-400 transition duration-200"
+                    className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
                   >
-                    Cancelar
+                    Crear Nueva Propiedad
                   </button>
                 </div>
               </form>
