@@ -309,7 +309,7 @@ export default function Dashboard() {
         setMensaje(`Error: ${result.error}`);
         setMensajeType("error");
       }
-    } catch (error) {
+    } catch {
       setMensaje("Error en la conexión al servidor.");
       setMensajeType("error");
     } finally {
