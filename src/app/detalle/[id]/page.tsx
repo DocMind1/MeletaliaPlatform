@@ -78,18 +78,26 @@ interface Property {
   PuntosFuertes?: string;
 }
 
+interface Reservation {
+  id: number;
+  attributes: {
+    estado: string;
+    fechaInicio: string;
+    fechaFin: string;
+  };
+}
+
 export default function DetallePropiedad() {
   const { id } = useParams();
-  const { user } = useAuth();
+  useAuth(); // Eliminamos 'user' porque no se usa
 
   const [property, setProperty] = useState<Property | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [occupiedDates, setOccupiedDates] = useState<Date[]>([]);
+  const [occupiedDates, setOccupiedDates] = useState<Date[]>([]); // Se mantiene por si se usa en el futuro
 
   const propertyId = Array.isArray(id) ? id[0] : id;
 
-  // Definimos images con useMemo antes de los useEffect
   const images = useMemo(() => {
     if (!property) {
       return [{ src: "/images/placeholder.jpg", alt: "Propiedad sin título" }];
@@ -127,10 +135,10 @@ export default function DetallePropiedad() {
     fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas?filters[propiedad][$eq]=${propertyId}&populate=*`)
       .then((res) => res.json())
       .then((data) => {
-        const reservations = data.data || [];
+        const reservations: Reservation[] = data.data || [];
         const occupied = reservations
-          .filter((res: any) => res.attributes.estado === "confirmada")
-          .flatMap((res: any) => {
+          .filter((res) => res.attributes.estado === "confirmada")
+          .flatMap((res) => {
             const start = moment(res.attributes.fechaInicio);
             const end = moment(res.attributes.fechaFin);
             const dates: Date[] = [];
@@ -192,10 +200,10 @@ export default function DetallePropiedad() {
     fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas?filters[propiedad][$eq]=${propertyId}&populate=*`)
       .then((res) => res.json())
       .then((data) => {
-        const reservations = data.data || [];
+        const reservations: Reservation[] = data.data || [];
         const occupied = reservations
-          .filter((res: any) => res.attributes.estado === "confirmada")
-          .flatMap((res: any) => {
+          .filter((res) => res.attributes.estado === "confirmada")
+          .flatMap((res) => {
             const start = moment(res.attributes.fechaInicio);
             const end = moment(res.attributes.fechaFin);
             const dates: Date[] = [];
