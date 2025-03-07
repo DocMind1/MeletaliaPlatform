@@ -228,33 +228,39 @@ export default function Dashboard() {
     }
   }, [mensaje]);
 
+
+
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
+      const checked = (e.target as HTMLInputElement).checked; // Cambiamos '_' por 'checked'
       if (name in formData.Servicios) {
         setFormData({
           ...formData,
-          Servicios: { ...formData.Servicios, [name]: checked },
+          Servicios: { ...formData.Servicios, [name]: checked }, // Usamos 'checked'
         });
       } else if (name in formData.Caracteristicas) {
         setFormData({
           ...formData,
-          Caracteristicas: { ...formData.Caracteristicas, [name]: checked },
+          Caracteristicas: { ...formData.Caracteristicas, [name]: checked }, // Usamos 'checked'
         });
       } else if (name in formData.Desayuno) {
         setFormData({
           ...formData,
-          Desayuno: { ...formData.Desayuno, [name]: checked },
+          Desayuno: { ...formData.Desayuno, [name]: checked }, // Usamos 'checked'
         });
       }
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
-  
+
+
+
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = e.target.files;
