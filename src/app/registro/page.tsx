@@ -48,6 +48,7 @@ export default function DetallePropiedad() {
         setProperty(data.data);
       } catch {
         console.error("Error fetching property");
+        console.log(occupiedDates);
       }
     };
     fetchProperty();
