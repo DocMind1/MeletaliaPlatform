@@ -1,4 +1,5 @@
 "use client";
+
 import { useParams } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
@@ -29,15 +30,15 @@ interface Reservation {
 export default function DetallePropiedad() {
   const params = useParams();
   const { id } = params || {};
-  useAuth(); // Reemplaza const { user } = useAuth() porque user no se usa
+  useAuth(); // Mantenemos el hook por posibles efectos secundarios
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [occupiedDates, setOccupiedDates] = useState<Date[]>([]); // Restaurado para funcionalidad de fechas ocupadas
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Mueve todos los useEffect al inicio
   useEffect(() => {
     const fetchProperty = async () => {
       if (!id) return;
@@ -58,7 +59,20 @@ export default function DetallePropiedad() {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas?filters[propiedad][$eq]=${id}`);
         const data = await res.json();
-        setReservations(data.data);
+        const fetchedReservations: Reservation[] = data.data || [];
+        setReservations(fetchedReservations);
+
+        // Calculamos las fechas ocupadas a partir de las reservas
+        const occupied = fetchedReservations.flatMap((reserva) => {
+          const start = moment(reserva.attributes.fechaInicio);
+          const end = moment(reserva.attributes.fechaFin);
+          const dates: Date[] = [];
+          for (let date = start; date <= end; date = date.clone().add(1, "days")) {
+            dates.push(date.toDate());
+          }
+          return dates;
+        });
+        setOccupiedDates(occupied);
       } catch {
         console.error("Error fetching reservations");
       }
