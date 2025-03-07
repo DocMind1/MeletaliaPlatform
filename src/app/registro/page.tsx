@@ -100,7 +100,7 @@ export default function DetallePropiedad() {
 
   if (!property) return <div>Cargando...</div>;
 
-  const { Titulo, Descripcion, Direccion, Precio, Imagenes } = property.attributes;
+  const { Titulo, Descripcion, Direccion, Precio } = property.attributes;
 
   const isDateBlocked = (date: Date): boolean => {
     return reservations.some((reserva) => {
