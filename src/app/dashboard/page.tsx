@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {  useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import {
   createProperty,
   uploadDashboardImages,
@@ -9,8 +9,6 @@ import {
   updateProperty,
 } from "../../../userService/userService";
 
-
-// Interfaz Property actualizada con fechas de disponibilidad
 interface Property {
   id: number;
   documentId: string;
@@ -18,6 +16,9 @@ interface Property {
   Descripcion: string;
   Precio: number;
   Direccion: string;
+  Pais: string;
+  ComunidadAutonoma: string;
+  Ciudad: string;
   Numerodehabitaciones?: number;
   Numerodebanos?: number;
   createdAt: string;
@@ -63,7 +64,13 @@ interface Property {
     Biblioteca: boolean;
     Jardin: boolean;
   };
-  Desayuno: string[];
+  Desayuno: {
+    Continental: boolean;
+    Vegetariano: boolean;
+    Vegano: boolean;
+    SinGluten: boolean;
+    Buffet: boolean;
+  };
   Caracteristicas: {
     Terraza: boolean;
     VistasPanoramicas: boolean;
@@ -94,7 +101,6 @@ interface Property {
 export default function Dashboard() {
   const { user } = useAuth();
 
-
   const [properties, setProperties] = useState<Property[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
@@ -103,6 +109,9 @@ export default function Dashboard() {
     Descripcion: "",
     Precio: "",
     Direccion: "",
+    Pais: "España",
+    ComunidadAutonoma: "",
+    Ciudad: "",
     Numerodehabitaciones: "",
     Numerodebanos: "",
     publishedAt: "",
@@ -129,7 +138,13 @@ export default function Dashboard() {
       Biblioteca: false,
       Jardin: false,
     },
-    Desayuno: [] as string[],
+    Desayuno: {
+      Continental: false,
+      Vegetariano: false,
+      Vegano: false,
+      SinGluten: false,
+      Buffet: false,
+    },
     Caracteristicas: {
       Terraza: false,
       VistasPanoramicas: false,
@@ -163,13 +178,23 @@ export default function Dashboard() {
 
   const jwt = user?.jwt || null;
   const userId = user ? parseInt(user.id.toString(), 10) : 0;
-  
 
   const loadProperties = async () => {
     setIsLoadingProperties(true);
     const result = await getProperties(jwt, userId);
     if (result.ok) {
-      setProperties(result.properties || []);
+      // Convertir Desayuno de string[] a objeto booleano para el frontend
+      const propertiesWithDesayunoObj = result.properties.map((prop: any) => ({
+        ...prop,
+        Desayuno: {
+          Continental: prop.Desayuno?.includes("Continental") || false,
+          Vegetariano: prop.Desayuno?.includes("Vegetariano") || false,
+          Vegano: prop.Desayuno?.includes("Vegano") || false,
+          SinGluten: prop.Desayuno?.includes("Sin Gluten") || false,
+          Buffet: prop.Desayuno?.includes("Buffet") || false,
+        },
+      }));
+      setProperties(propertiesWithDesayunoObj);
     } else {
       setMensaje("Error al cargar propiedades");
       setMensajeType("error");
@@ -177,8 +202,6 @@ export default function Dashboard() {
     }
     setIsLoadingProperties(false);
   };
-
-
 
   useEffect(() => {
     if (jwt && userId) {
@@ -196,7 +219,6 @@ export default function Dashboard() {
     }
   }, [mensaje]);
 
- 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -213,13 +235,12 @@ export default function Dashboard() {
           ...formData,
           Caracteristicas: { ...formData.Caracteristicas, [name]: checked },
         });
+      } else if (name in formData.Desayuno) {
+        setFormData({
+          ...formData,
+          Desayuno: { ...formData.Desayuno, [name]: checked },
+        });
       }
-    } else if (type === "select-multiple") {
-      const selectedOptions = Array.from(
-        (e.target as HTMLSelectElement).selectedOptions,
-        (option) => option.value
-      );
-      setFormData({ ...formData, [name]: selectedOptions });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -228,11 +249,9 @@ export default function Dashboard() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = e.target.files;
-      // Validar que no se suban más de 8 imágenes
       if (selectedFiles.length > 8) {
         setMensaje("No puedes subir más de 8 imágenes.");
         setMensajeType("error");
-        // Limpiar el input para evitar que se procesen más de 8 imágenes
         e.target.value = "";
         return;
       }
@@ -263,11 +282,19 @@ export default function Dashboard() {
         }
       }
 
+      // Convertir Desayuno de objeto booleano a array de strings
+      const desayunoArray = Object.entries(formData.Desayuno)
+        .filter(([_, value]) => value)
+        .map(([key]) => (key === "SinGluten" ? "Sin Gluten" : key));
+
       const propertyData = {
         Titulo: formData.Titulo,
         Descripcion: formData.Descripcion,
         Precio: parseFloat(formData.Precio),
         Direccion: formData.Direccion,
+        Pais: formData.Pais,
+        ComunidadAutonoma: formData.ComunidadAutonoma,
+        Ciudad: formData.Ciudad,
         Numerodehabitaciones: formData.Numerodehabitaciones
           ? parseInt(formData.Numerodehabitaciones)
           : undefined,
@@ -286,7 +313,7 @@ export default function Dashboard() {
         users_permissions_user: userId,
         Imagenes: imageIds,
         Servicios: formData.Servicios,
-        Desayuno: formData.Desayuno,
+        Desayuno: desayunoArray, // Enviar como string[]
         Caracteristicas: formData.Caracteristicas,
         PuntosFuertes: formData.PuntosFuertes,
       };
@@ -341,24 +368,17 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Fixed Header */}
-      <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-10">
-        {/* Contenido del header si lo necesitas */}
-      </header>
-
-      {/* Main Content */}
+      <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-10"></header>
       <main className="max-w-6xl mx-auto pt-24 pb-6 px-6">
-        {/* Toast Notification */}
         {mensaje && (
           <div
-            className={`fixed top-20 right-6 px-6 py-3 rounded-md shadow-lg text-white transition-opacity duration-300 ${mensajeType === "success" ? "bg-green-500" : "bg-red-500"
-              }`}
+            className={`fixed top-20 right-6 px-6 py-3 rounded-md shadow-lg text-white transition-opacity duration-300 ${
+              mensajeType === "success" ? "bg-green-500" : "bg-red-500"
+            }`}
           >
             {mensaje}
           </div>
         )}
-
-        {/* Popup (Modal) para el Formulario */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
             <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
@@ -366,11 +386,8 @@ export default function Dashboard() {
                 {editingProperty ? "Editar Propiedad" : "Crear Propiedad"}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Título */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Título *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Título *</label>
                   <input
                     type="text"
                     name="Titulo"
@@ -380,23 +397,70 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-
-
-
-      
-
-
-
-
-
-
-
-
-                {/* Descripción */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Descripción *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">País *</label>
+                  <input
+                    type="text"
+                    name="Pais"
+                    value={formData.Pais}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Comunidad Autónoma *</label>
+                  <select
+                    name="ComunidadAutonoma"
+                    value={formData.ComunidadAutonoma}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Selecciona una comunidad</option>
+                    <option value="Andalucía">Andalucía</option>
+                    <option value="Aragón">Aragón</option>
+                    <option value="Asturias">Asturias</option>
+                    <option value="Baleares">Baleares</option>
+                    <option value="Canarias">Canarias</option>
+                    <option value="Cantabria">Cantabria</option>
+                    <option value="Castilla y León">Castilla y León</option>
+                    <option value="Castilla-La Mancha">Castilla-La Mancha</option>
+                    <option value="Cataluña">Cataluña</option>
+                    <option value="Comunidad Valenciana">Comunidad Valenciana</option>
+                    <option value="Extremadura">Extremadura</option>
+                    <option value="Galicia">Galicia</option>
+                    <option value="La Rioja">La Rioja</option>
+                    <option value="Madrid">Madrid</option>
+                    <option value="Murcia">Murcia</option>
+                    <option value="Navarra">Navarra</option>
+                    <option value="País Vasco">País Vasco</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Ciudad *</label>
+                  <input
+                    type="text"
+                    name="Ciudad"
+                    value={formData.Ciudad}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Dirección *</label>
+                  <input
+                    type="text"
+                    name="Direccion"
+                    value={formData.Direccion}
+                    onChange={handleChange}
+                    required
+                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Descripción *</label>
                   <textarea
                     name="Descripcion"
                     value={formData.Descripcion}
@@ -405,11 +469,8 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                {/* Precio */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Precio (€) *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Precio (€) *</label>
                   <input
                     type="number"
                     name="Precio"
@@ -421,25 +482,8 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                {/* Dirección */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Dirección *
-                  </label>
-                  <input
-                    type="text"
-                    name="Direccion"
-                    value={formData.Direccion}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                {/* Número de habitaciones */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Número de habitaciones
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Número de habitaciones</label>
                   <input
                     type="number"
                     name="Numerodehabitaciones"
@@ -449,11 +493,8 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                {/* Número de baños */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Número de baños
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Número de baños</label>
                   <input
                     type="number"
                     name="Numerodebanos"
@@ -463,11 +504,8 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                {/* Fecha de publicación */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Fecha de publicación
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Fecha de publicación</label>
                   <input
                     type="date"
                     name="publishedAt"
@@ -476,11 +514,8 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                {/* Fecha de Disponibilidad Desde */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Disponible Desde
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Disponible Desde</label>
                   <input
                     type="date"
                     name="DisponibleDesde"
@@ -489,11 +524,8 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                {/* Fecha de Disponibilidad Hasta */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Disponible Hasta
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Disponible Hasta</label>
                   <input
                     type="date"
                     name="DisponibleHasta"
@@ -502,99 +534,80 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                {/* Servicios */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Servicios
-                  </h3>
+                  <h3 className="text-lg font-medium text-gray-900">Servicios</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(formData.Servicios).map(
-                      ([servicio, checked]) => (
-                        <label
-                          key={servicio}
-                          className="flex items-center space-x-2"
-                        >
-                          <input
-                            type="checkbox"
-                            name={servicio}
-                            checked={checked}
-                            onChange={handleChange}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <span className="text-sm text-gray-700">
-                            {servicio
-                              .replace(/([A-Z])/g, " $1")
-                              .trim()
-                              .replace("Adaptado Movilidad Reducida", "Adaptado movilidad reducida")
-                              .replace("Recepcion24h", "Recepción 24h")
-                              .replace("Aire Acondicionado Comun", "Aire acondicionado común")
-                              .replace("Calefaccion Comun", "Calefacción común")
-                              .replace("Area Juegos Infantiles", "Área juegos infantiles")}
-                          </span>
-                        </label>
-                      )
-                    )}
+                    {Object.entries(formData.Servicios).map(([servicio, checked]) => (
+                      <label key={servicio} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          name={servicio}
+                          checked={checked}
+                          onChange={handleChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="text-sm text-gray-700">
+                          {servicio
+                            .replace(/([A-Z])/g, " $1")
+                            .trim()
+                            .replace("Adaptado Movilidad Reducida", "Adaptado movilidad reducida")
+                            .replace("Recepcion24h", "Recepción 24h")
+                            .replace("Aire Acondicionado Comun", "Aire acondicionado común")
+                            .replace("Calefaccion Comun", "Calefacción común")
+                            .replace("Area Juegos Infantiles", "Área juegos infantiles")}
+                        </span>
+                      </label>
+                    ))}
                   </div>
                 </div>
-                {/* Opciones de Desayuno */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Opciones de Desayuno
-                  </h3>
-                  <select
-                    multiple
-                    name="Desayuno"
-                    value={formData.Desayuno}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="Continental">Continental</option>
-                    <option value="Vegetariano">Vegetariano</option>
-                    <option value="Vegano">Vegano</option>
-                    <option value="Sin Gluten">Sin Gluten</option>
-                    <option value="Buffet">Buffet</option>
-                  </select>
-                </div>
-                {/* Características de las Habitaciones */}
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Características de las Habitaciones
-                  </h3>
+                  <h3 className="text-lg font-medium text-gray-900">Opciones de Desayuno</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(formData.Caracteristicas).map(
-                      ([caracteristica, checked]) => (
-                        <label
-                          key={caracteristica}
-                          className="flex items-center space-x-2"
-                        >
-                          <input
-                            type="checkbox"
-                            name={caracteristica}
-                            checked={checked}
-                            onChange={handleChange}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <span className="text-sm text-gray-700">
-                            {caracteristica
-                              .replace(/([A-Z])/g, " $1")
-                              .trim()
-                              .replace("Vistas Panoramicas", "Vistas panorámicas")
-                              .replace("TV Pantalla Plana", "TV pantalla plana")
-                              .replace("Articulos Aseo", "Artículos de aseo")
-                              .replace("Hervidor Electrico", "Hervidor eléctrico")
-                              .replace("Cama Extra Grande", "Cama extra grande")
-                              .replace("Servicio Streaming", "Servicio de streaming")}
-                          </span>
-                        </label>
-                      )
-                    )}
+                    {Object.entries(formData.Desayuno).map(([option, checked]) => (
+                      <label key={option} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          name={option}
+                          checked={checked}
+                          onChange={handleChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="text-sm text-gray-700">
+                          {option.replace("SinGluten", "Sin Gluten")}
+                        </span>
+                      </label>
+                    ))}
                   </div>
                 </div>
-                {/* Puntos Fuertes */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Puntos Fuertes
-                  </label>
+                  <h3 className="text-lg font-medium text-gray-900">Características de las Habitaciones</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(formData.Caracteristicas).map(([caracteristica, checked]) => (
+                      <label key={caracteristica} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          name={caracteristica}
+                          checked={checked}
+                          onChange={handleChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="text-sm text-gray-700">
+                          {caracteristica
+                            .replace(/([A-Z])/g, " $1")
+                            .trim()
+                            .replace("Vistas Panoramicas", "Vistas panorámicas")
+                            .replace("TV Pantalla Plana", "TV pantalla plana")
+                            .replace("Articulos Aseo", "Artículos de aseo")
+                            .replace("Hervidor Electrico", "Hervidor eléctrico")
+                            .replace("Cama Extra Grande", "Cama extra grande")
+                            .replace("Servicio Streaming", "Servicio de streaming")}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Puntos Fuertes</label>
                   <textarea
                     name="PuntosFuertes"
                     value={formData.PuntosFuertes}
@@ -602,11 +615,8 @@ export default function Dashboard() {
                     className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                {/* Imágenes */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Imágenes (máximo 8)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Imágenes (máximo 8)</label>
                   <input
                     type="file"
                     name="imagenes"
@@ -615,25 +625,21 @@ export default function Dashboard() {
                     onChange={handleFileChange}
                     className="mt-1 block w-full"
                   />
-                  <p className="text-sm text-gray-500">
-                    Arrastra y suelta o haz clic para añadir hasta 8 imágenes.
-                  </p>
+                  <p className="text-sm text-gray-500">Arrastra y suelta o haz clic para añadir hasta 8 imágenes.</p>
                 </div>
-                {/* Botones */}
                 <div className="flex space-x-4">
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`flex-1 py-2 rounded-md flex justify-center items-center ${loading
-                        ? "bg-gray-500 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
-                      } text-white transition duration-200`}
+                    className={`flex-1 py-2 rounded-md flex justify-center items-center ${
+                      loading ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                    } text-white transition duration-200`}
                   >
                     {loading
                       ? "Guardando..."
                       : editingProperty
-                        ? "Actualizar Propiedad"
-                        : "Crear Propiedad"}
+                      ? "Actualizar Propiedad"
+                      : "Crear Propiedad"}
                   </button>
                   <button
                     type="button"
@@ -645,6 +651,9 @@ export default function Dashboard() {
                         Descripcion: "",
                         Precio: "",
                         Direccion: "",
+                        Pais: "España",
+                        ComunidadAutonoma: "",
+                        Ciudad: "",
                         Numerodehabitaciones: "",
                         Numerodebanos: "",
                         publishedAt: "",
@@ -671,7 +680,13 @@ export default function Dashboard() {
                           Biblioteca: false,
                           Jardin: false,
                         },
-                        Desayuno: [],
+                        Desayuno: {
+                          Continental: false,
+                          Vegetariano: false,
+                          Vegano: false,
+                          SinGluten: false,
+                          Buffet: false,
+                        },
                         Caracteristicas: {
                           Terraza: false,
                           VistasPanoramicas: false,
@@ -708,13 +723,9 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
-        {/* Listado de Propiedades */}
         <div className="mt-8">
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-              Mis Propiedades
-            </h2>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Mis Propiedades</h2>
             <button
               onClick={() => {
                 setShowModal(true);
@@ -724,6 +735,9 @@ export default function Dashboard() {
                   Descripcion: "",
                   Precio: "",
                   Direccion: "",
+                  Pais: "España",
+                  ComunidadAutonoma: "",
+                  Ciudad: "",
                   Numerodehabitaciones: "",
                   Numerodebanos: "",
                   publishedAt: "",
@@ -750,7 +764,13 @@ export default function Dashboard() {
                     Biblioteca: false,
                     Jardin: false,
                   },
-                  Desayuno: [],
+                  Desayuno: {
+                    Continental: false,
+                    Vegetariano: false,
+                    Vegano: false,
+                    SinGluten: false,
+                    Buffet: false,
+                  },
                   Caracteristicas: {
                     Terraza: false,
                     VistasPanoramicas: false,
@@ -805,22 +825,14 @@ export default function Dashboard() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              <span className="ml-2 text-gray-600">
-                Cargando propiedades...
-              </span>
+              <span className="ml-2 text-gray-600">Cargando propiedades...</span>
             </div>
           ) : properties.length === 0 ? (
-            <p className="text-gray-600 text-center">
-              No hay propiedades disponibles.
-            </p>
+            <p className="text-gray-600 text-center">No hay propiedades disponibles.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties.map((prop) => {
-                const imageUrl =
-                  prop.Imagenes?.length && prop.Imagenes[0]?.url
-                    ? prop.Imagenes[0].url
-                    : null;
-
+                const imageUrl = prop.Imagenes?.length && prop.Imagenes[0]?.url ? prop.Imagenes[0].url : null;
                 return (
                   <div
                     key={prop.id}
@@ -832,9 +844,7 @@ export default function Dashboard() {
                         alt={prop.Titulo}
                         className="w-full h-48 object-cover"
                         onError={(e) => {
-                          console.log(
-                            `Error cargando imagen para ${prop.Titulo}: ${imageUrl}`
-                          );
+                          console.log(`Error cargando imagen para ${prop.Titulo}: ${imageUrl}`);
                           e.currentTarget.src = "/images/placeholder.jpg";
                         }}
                       />
@@ -844,40 +854,25 @@ export default function Dashboard() {
                       </div>
                     )}
                     <div className="p-4">
-                      <h3 className="text-lg font-bold text-gray-800">
-                        {prop.Titulo}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Precio: €{prop.Precio.toFixed(2)}
-                      </p>
+                      <h3 className="text-lg font-bold text-gray-800">{prop.Titulo}</h3>
+                      <p className="text-sm text-gray-600 mt-1">Precio: €{prop.Precio.toFixed(2)}</p>
+                      <p className="text-sm text-gray-600">Ubicación: {prop.Ciudad}, {prop.ComunidadAutonoma}, {prop.Pais}</p>
                       <p className="text-sm text-gray-600">
-                        Habitaciones: {prop.Numerodehabitaciones || "N/A"} |
-                        Baños: {prop.Numerodebanos || "N/A"}
+                        Habitaciones: {prop.Numerodehabitaciones || "N/A"} | Baños: {prop.Numerodebanos || "N/A"}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
                         Creado: {new Date(prop.createdAt).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Publicado:{" "}
-                        {prop.publishedAt
-                          ? new Date(prop.publishedAt).toLocaleDateString()
-                          : "No publicado"}
+                        Publicado: {prop.publishedAt ? new Date(prop.publishedAt).toLocaleDateString() : "No publicado"}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Disponible Desde:{" "}
-                        {prop.DisponibleDesde
-                          ? new Date(prop.DisponibleDesde).toLocaleDateString()
-                          : "N/A"}
+                        Disponible Desde: {prop.DisponibleDesde ? new Date(prop.DisponibleDesde).toLocaleDateString() : "N/A"}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Disponible Hasta:{" "}
-                        {prop.DisponibleHasta
-                          ? new Date(prop.DisponibleHasta).toLocaleDateString()
-                          : "N/A"}
+                        Disponible Hasta: {prop.DisponibleHasta ? new Date(prop.DisponibleHasta).toLocaleDateString() : "N/A"}
                       </p>
-                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                        {prop.Descripcion}
-                      </p>
+                      <p className="text-sm text-gray-600 mt-2 line-clamp-2">{prop.Descripcion}</p>
                     </div>
                     <div className="p-4 pt-0 flex space-x-2">
                       <button
@@ -889,13 +884,12 @@ export default function Dashboard() {
                             Descripcion: prop.Descripcion,
                             Precio: prop.Precio.toString(),
                             Direccion: prop.Direccion,
-                            Numerodehabitaciones:
-                              prop.Numerodehabitaciones?.toString() || "",
-                            Numerodebanos:
-                              prop.Numerodebanos?.toString() || "",
-                            publishedAt: prop.publishedAt
-                              ? prop.publishedAt.split("T")[0]
-                              : "",
+                            Pais: prop.Pais || "España",
+                            ComunidadAutonoma: prop.ComunidadAutonoma || "",
+                            Ciudad: prop.Ciudad || "",
+                            Numerodehabitaciones: prop.Numerodehabitaciones?.toString() || "",
+                            Numerodebanos: prop.Numerodebanos?.toString() || "",
+                            publishedAt: prop.publishedAt ? prop.publishedAt.split("T")[0] : "",
                             imagenes: null,
                             Servicios: prop.Servicios || {
                               WiFi: false,
@@ -919,7 +913,13 @@ export default function Dashboard() {
                               Biblioteca: false,
                               Jardin: false,
                             },
-                            Desayuno: prop.Desayuno || [],
+                            Desayuno: prop.Desayuno || {
+                              Continental: false,
+                              Vegetariano: false,
+                              Vegano: false,
+                              SinGluten: false,
+                              Buffet: false,
+                            },
                             Caracteristicas: prop.Caracteristicas || {
                               Terraza: false,
                               VistasPanoramicas: false,
@@ -943,12 +943,8 @@ export default function Dashboard() {
                               ServicioStreaming: false,
                             },
                             PuntosFuertes: prop.PuntosFuertes || "",
-                            DisponibleDesde: prop.DisponibleDesde
-                              ? prop.DisponibleDesde.split("T")[0]
-                              : "",
-                            DisponibleHasta: prop.DisponibleHasta
-                              ? prop.DisponibleHasta.split("T")[0]
-                              : "",
+                            DisponibleDesde: prop.DisponibleDesde ? prop.DisponibleDesde.split("T")[0] : "",
+                            DisponibleHasta: prop.DisponibleHasta ? prop.DisponibleHasta.split("T")[0] : "",
                           });
                         }}
                         className="flex-1 bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition duration-200"

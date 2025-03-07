@@ -38,13 +38,78 @@ export interface RegisterBody {
   password: string;
 }
 
+export interface PropertyBody {
+  Titulo: string;
+  Descripcion: string;
+  Precio: number;
+  Direccion: string;
+  Pais?: string; // Nuevo campo
+  ComunidadAutonoma?: string; // Nuevo campo
+  Ciudad?: string; // Nuevo campo
+  Numerodehabitaciones?: number;
+  Numerodebanos?: number;
+  publishedAt?: string;
+  users_permissions_user: number;
+  Imagenes?: number[];
+  Servicios?: {
+    WiFi: boolean;
+    Parking: boolean;
+    AdaptadoMovilidadReducida: boolean;
+    Piscina: boolean;
+    Gimnasio: boolean;
+    Spa: boolean;
+    Restaurante: boolean;
+    Bar: boolean;
+    Lavanderia: boolean;
+    Recepcion24h: boolean;
+    TransporteAeropuerto: boolean;
+    ServicioHabitaciones: boolean;
+    AdmiteMascotas: boolean;
+    ZonasFumadores: boolean;
+    AireAcondicionadoComun: boolean;
+    CalefaccionComun: boolean;
+    SalaConferencias: boolean;
+    AreaJuegosInfantiles: boolean;
+    Biblioteca: boolean;
+    Jardin: boolean;
+  };
+  Desayuno?: string[]; // Mantenemos como string[] para Strapi
+  Caracteristicas?: {
+    Terraza: boolean;
+    VistasPanoramicas: boolean;
+    AireAcondicionado: boolean;
+    Calefaccion: boolean;
+    Minibar: boolean;
+    TVPantallaPlana: boolean;
+    CajaFuerte: boolean;
+    Escritorio: boolean;
+    Banera: boolean;
+    Ducha: boolean;
+    SecadorPelo: boolean;
+    ArticulosAseo: boolean;
+    Armario: boolean;
+    Insonorizacion: boolean;
+    Cafetera: boolean;
+    HervidorElectrico: boolean;
+    Microondas: boolean;
+    Nevera: boolean;
+    CamaExtraGrande: boolean;
+    ServicioStreaming: boolean;
+  };
+  PuntosFuertes?: string;
+  DisponibleDesde?: string;
+  DisponibleHasta?: string;
+}
+
+
 export interface UpdateBody {
   countryCode?: string;
   phone?: string;
   identityDocument?: string;
   identityFiles?: string[];
-  role?: number; // El rol solo se envía en updateUser
+  role?: number;
 }
+
 
 export interface PropertyBody {
   Titulo: string;
