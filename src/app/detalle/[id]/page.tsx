@@ -5,10 +5,10 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import moment from "moment";
 import {
-  Ban,
+ 
   Accessibility,
   Bell,
-  Airplay,
+ 
   Wifi,
   Car,
   Users,
@@ -162,7 +162,7 @@ export default function DetallePropiedad() {
     Descripcion,
     Direccion,
     Precio,
-    Imagenes,
+ 
     DisponibleDesde,
     DisponibleHasta,
     Servicios,
