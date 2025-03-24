@@ -76,7 +76,17 @@ interface Property {
     CamaExtraGrande?: boolean;
   };
   PuntosFuertes?: string;
+  users_permissions_user?: {
+    data: {
+      id: number;
+      attributes: {
+        stripeAccountId?: string;
+      };
+    };
+  };
 }
+
+
 
 interface Reservation {
   id: number;
@@ -88,15 +98,15 @@ interface Reservation {
 }
 
 export default function DetallePropiedad() {
-  const { id } = useParams();
-  useAuth(); // Eliminamos 'user' porque no se usa
-
+  
+  const { user } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [occupiedDates, setOccupiedDates] = useState<Date[]>([]); // Se mantiene por si se usa en el futuro
 
-  const propertyId = Array.isArray(id) ? id[0] : id;
+  const params = useParams(); // Obtener los parámetros sin desestructurar directamente
+  const propertyId = Array.isArray(params?.id) ? params?.id[0] : params?.id; // Manejar caso de array o string
 
   const images = useMemo(() => {
     if (!property) {
@@ -499,14 +509,17 @@ export default function DetallePropiedad() {
       </div>
 
       {isModalOpen && (
-        <ReservationForm
+  <ReservationForm
           propertyId={propertyId}
           availableFrom={DisponibleDesde || ""}
           availableUntil={DisponibleHasta || ""}
+          pricePerNight={Precio} // Agregar precio por noche
+          isOwner={user?.id === (property?.users_permissions_user?.data?.id ?? null)}
           onClose={closeModal}
           onSuccess={handleReservationSuccess}
-        />
-      )}
+          occupiedDates={occupiedDates} // Pasar las fechas ocupadas
+          ownerStripeId={null}  />
+)}
     </div>
   );
 }
