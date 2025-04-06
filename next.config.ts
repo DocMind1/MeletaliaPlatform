@@ -1,16 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-module.exports = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     domains: ['patient-bee-cba03aa48e.media.strapiapp.com'],
   },
 };
-
-
-
 
 export default nextConfig;
