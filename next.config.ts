@@ -1,9 +1,10 @@
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
-    ignoreDuringBuilds: true, // ❗ desactiva el bloqueo del build por errores ESLint
+    ignoreDuringBuilds: true,
   },
   images: {
     domains: ['patient-bee-cba03aa48e.media.strapiapp.com'],
