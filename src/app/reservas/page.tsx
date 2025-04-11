@@ -46,6 +46,7 @@ const ReservasPage: React.FC = () => {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [editando, setEditando] = useState<{ [key: number]: boolean }>({});
   const [estadoCambios, setEstadoCambios] = useState<{ [key: number]: string }>({});
+  const [filtroEstado, setFiltroEstado] = useState<string>("todas");
 
   useEffect(() => {
     const fetchReservas = async () => {
@@ -64,9 +65,9 @@ const ReservasPage: React.FC = () => {
       if (user.role?.id === 3) {
         setIsOwner(true);
         console.log("Usuario es Propietario (role.id=3)");
-      } else if (user.role?.id !== 2) {
+      } else if (user.role?.id !== 4) {
         setError("No tienes permiso para ver esta página.");
-        console.log("Usuario no tiene rol permitido (ni 2 ni 3)");
+        console.log("Usuario no tiene rol permitido (ni 4 ni 3)");
         setLoading(false);
         return;
       }
@@ -213,8 +214,9 @@ const ReservasPage: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        const errorMessage = `Error al actualizar el estado: ${response.status} - ${errorData?.error?.message || "Sin detalles"}`;
         console.log(`Error al actualizar reserva: ${response.status} - ${JSON.stringify(errorData)}`);
-        throw new Error(`Error al actualizar el estado de la reserva: ${response.status} - ${errorData?.error?.message || "Sin detalles"}`);
+        throw new Error(errorMessage);
       }
 
       const updatedReserva = await response.json();
@@ -233,10 +235,19 @@ const ReservasPage: React.FC = () => {
       });
       setError(null);
     } catch (err) {
-      console.log(`Error en updateReservationStatus: ${(err as Error).message}`);
-      setError((err as Error).message || "Error al actualizar el estado de la reserva");
+      const errorMsg = (err as Error).message || "Error al actualizar el estado de la reserva";
+      console.log(`Error en updateReservationStatus: ${errorMsg}`);
+      setError(errorMsg);
     }
   };
+
+  // Filtrar reservas según el estado seleccionado
+  const filteredReservas = reservas.filter((reserva) => {
+    if (filtroEstado === "todas") return true;
+    if (filtroEstado === "pasadas") return moment(reserva.fechaFin).isBefore(moment());
+    if (filtroEstado === "futuras") return moment(reserva.fechaFin).isSameOrAfter(moment());
+    return reserva.estado === filtroEstado;
+  });
 
   if (!user) {
     return <div className="container mx-auto p-6 text-red-600 text-center">Inicia sesión.</div>;
@@ -261,90 +272,140 @@ const ReservasPage: React.FC = () => {
         {isOwner ? "Reservas Recibidas" : "Mis Reservas"}
       </h1>
 
-      {reservas.length === 0 ? (
+      {/* Filtro por estado */}
+      <div className="mb-6 flex gap-4">
+        <button
+          onClick={() => setFiltroEstado("todas")}
+          className={`text-sm px-4 py-2 rounded-md ${filtroEstado === "todas" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Todas
+        </button>
+        <button
+          onClick={() => setFiltroEstado("futuras")}
+          className={`text-sm px-4 py-2 rounded-md ${filtroEstado === "futuras" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Futuras
+        </button>
+        <button
+          onClick={() => setFiltroEstado("pasadas")}
+          className={`text-sm px-4 py-2 rounded-md ${filtroEstado === "pasadas" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Pasadas
+        </button>
+        <button
+          onClick={() => setFiltroEstado("pendiente")}
+          className={`text-sm px-4 py-2 rounded-md ${filtroEstado === "pendiente" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Pendientes
+        </button>
+        <button
+          onClick={() => setFiltroEstado("confirmada")}
+          className={`text-sm px-4 py-2 rounded-md ${filtroEstado === "confirmada" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Confirmadas
+        </button>
+        {isOwner && (
+          <button
+            onClick={() => setFiltroEstado("completada")}
+            className={`text-sm px-4 py-2 rounded-md ${filtroEstado === "completada" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Completadas
+          </button>
+        )}
+      </div>
+
+      {filteredReservas.length === 0 ? (
         <p className="text-gray-500 text-center py-8">
           {isOwner ? "No hay reservas recibidas." : "No tienes reservas."}
         </p>
       ) : (
         <div className="space-y-4">
-          {reservas.map((reserva) => (
-            <div
-              key={reserva.id}
-              className="flex justify-between items-center p-4 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition"
-            >
-              <div className="text-sm text-gray-700 space-y-1">
-                <div>
-                  <Link
-                    href={`/detalle/${reserva.propiedad?.id || reserva.id}`}
-                    className="text-blue-600 hover:underline font-medium"
-                  >
-                    {reserva.propiedad?.Titulo || reserva.propiedad?.attributes?.Titulo || "N/A"}
-                  </Link>
-                </div>
-                {isOwner && (
-                  <div className="text-gray-500">
-                    {reserva.usuario?.username || "N/A"} ({reserva.usuario?.email || "N/A"},{" "}
-                    {(reserva.usuario?.countryCode || "") + (reserva.usuario?.phone || "N/A")})
+          {filteredReservas.map((reserva) => {
+            const isPast = moment(reserva.fechaFin).isBefore(moment());
+            return (
+              <div
+                key={reserva.id}
+                className={`flex justify-between items-center p-4 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition ${isPast ? "opacity-60" : ""}`}
+              >
+                <div className="text-sm text-gray-700 space-y-1">
+                  <div>
+                    <Link
+                      href={`/detalle/${reserva.propiedad?.id || reserva.id}`}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      {reserva.propiedad?.Titulo || reserva.propiedad?.attributes?.Titulo || "N/A"}
+                    </Link>
                   </div>
-                )}
-                <div className="text-gray-500">
-                  Reservado: {moment(reserva.createdAt).format("DD/MM/YYYY")} · Desde:{" "}
-                  {moment(reserva.fechaInicio).format("DD/MM/YYYY")} · Hasta:{" "}
-                  {moment(reserva.fechaFin).format("DD/MM/YYYY")}
+                  {isOwner && (
+                    <div className="text-gray-500">
+                      {reserva.usuario?.username || "N/A"} ({reserva.usuario?.email || "N/A"},{" "}
+                      {(reserva.usuario?.countryCode || "") + (reserva.usuario?.phone || "N/A")})
+                    </div>
+                  )}
+                  <div className="text-gray-500">
+                    Reservado: {moment(reserva.createdAt).format("DD/MM/YYYY")} · Desde:{" "}
+                    {moment(reserva.fechaInicio).format("DD/MM/YYYY")} · Hasta:{" "}
+                    {moment(reserva.fechaFin).format("DD/MM/YYYY")}
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  {isOwner ? (
+                    editando[reserva.id] ? (
+                      <>
+                        <select
+                          value={estadoCambios[reserva.id] || reserva.estado}
+                          onChange={(e) => handleEstadoChange(reserva.id, e.target.value)}
+                          className="text-sm border-gray-200 rounded-md p-1.5 focus:ring-2 focus:ring-blue-200 outline-none"
+                        >
+                          <option value="pendiente">Pendiente</option>
+                          <option value="confirmada">Confirmada</option>
+                          <option value="completada">Completada</option>
+                        </select>
+                        <button
+                          onClick={() => updateReservationStatus(reserva.id)}
+                          className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition"
+                        >
+                          Guardar
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span
+                          className={`text-sm capitalize px-2 py-1 rounded-full ${
+                            reserva.estado === "confirmada"
+                              ? "bg-green-100 text-green-700"
+                              : reserva.estado === "completada"
+                              ? "bg-gray-100 text-gray-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {reserva.estado || "N/A"}
+                        </span>
+                        <button
+                          onClick={() => toggleEditando(reserva.id)}
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          Editar
+                        </button>
+                      </>
+                    )
+                  ) : (
+                    <span
+                      className={`text-sm capitalize px-2 py-1 rounded-full ${
+                        reserva.estado === "confirmada"
+                          ? "bg-green-100 text-green-700"
+                          : reserva.estado === "completada"
+                          ? "bg-gray-100 text-gray-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {reserva.estado || "N/A"}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
-                {isOwner ? (
-                  editando[reserva.id] ? (
-                    <>
-                      <select
-                        value={estadoCambios[reserva.id] || reserva.estado}
-                        onChange={(e) => handleEstadoChange(reserva.id, e.target.value)}
-                        className="text-sm border-gray-200 rounded-md p-1.5 focus:ring-2 focus:ring-blue-200 outline-none"
-                      >
-                        <option value="pendiente">Pendiente</option>
-                        <option value="confirmada">Confirmada</option>
-                      </select>
-                      <button
-                        onClick={() => updateReservationStatus(reserva.id)}
-                        className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition"
-                      >
-                        Guardar
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        className={`text-sm capitalize px-2 py-1 rounded-full ${
-                          reserva.estado === "confirmada"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {reserva.estado || "N/A"}
-                      </span>
-                      <button
-                        onClick={() => toggleEditando(reserva.id)}
-                        className="text-sm text-blue-600 hover:text-blue-800"
-                      >
-                        Editar
-                      </button>
-                    </>
-                  )
-                ) : (
-                  <span
-                    className={`text-sm capitalize px-2 py-1 rounded-full ${
-                      reserva.estado === "confirmada"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {reserva.estado || "N/A"}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

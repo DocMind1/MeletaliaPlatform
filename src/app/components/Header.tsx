@@ -69,7 +69,7 @@ const Header: React.FC = () => {
                           </li>
                         </>
                       )}
-                      {user.role?.id === 2 && (
+                      {user.role?.id === 4 && (
                         <li className="px-4 py-2 hover:bg-gray-100">
                           <Link href="/reservas">Mis Reservas</Link>
                         </li>
