@@ -235,9 +235,9 @@ export default function DetallePropiedad() {
   return (
     <div className="max-w-6xl mx-auto pl-4 pr-4">
       <Header />
-      <h1 className="text-2xl font-bold mt-4">{Titulo}</h1>
-      <p className="text-sm text-gray-600 flex items-center gap-2 mt-2">
-        <span className="text-gray-800">📍</span>
+      <h1 className="text-2xl font-bold mt-4  text-black ">{Titulo}</h1>
+      <p className="text-sm text-black flex items-center gap-2 mt-2">
+        <span className="text-black">📍</span>
         {Direccion} | Disponible desde: {DisponibleDesde ? new Date(DisponibleDesde).toLocaleDateString() : "No especificado"} | Disponible hasta: {DisponibleHasta ? new Date(DisponibleHasta).toLocaleDateString() : "No especificado"}
       </p>
 
@@ -278,7 +278,7 @@ export default function DetallePropiedad() {
           </div>
           <div className="bg-white p-4 rounded-lg flex flex-col justify-between">
             <div>
-              <h2 className="text-base font-semibold">Precio</h2>
+              <h2 className="text-base font-semibold  text-black ">Precio</h2>
               <p className="text-xl font-bold text-gray-800 mt-2">€ {Precio}</p>
               <button
                 onClick={openModal}

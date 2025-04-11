@@ -6,7 +6,7 @@ import Header from "./components/Header";
 
 export default function Home() {
   return (
-    <div className="max-w-6xl mx-auto pl-4 pr-4">
+    <div className="max-w-6xl mx-auto pl-4 pr-4 bg-white text-black">
      
 
   

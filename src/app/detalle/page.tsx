@@ -60,7 +60,7 @@ export default function PlantillaDetalle() {
   return (
     <div className="max-w-6xl mx-auto p-4">
       {/* Contenido principal */}
-      <h1 className="text-xl font-bold mt-4">Casa Rural La Marquesa - Cuenca</h1>
+      <h1 className="text-xl font-bold mt-4 text-gray-800  ">Casa Rural La Marquesa - Cuenca</h1>
       <p className="text-sm text-gray-600 flex items-center gap-2 mt-2">
         <span className="text-gray-800">📍</span>
         Calle San Isidro número 32 Casa rural, 16120 Valera de Abajo, España
