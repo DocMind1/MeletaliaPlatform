@@ -6,8 +6,6 @@ import moment from "moment";
 import Link from "next/link";
 import Image from "next/image";
 
-
-
 interface User {
   id: number;
   username: string;
@@ -21,7 +19,7 @@ interface Property {
   attributes?: {
     Titulo: string;
   };
-  Titulo?: string; // Para casos donde no hay attributes
+  Titulo?: string;
 }
 
 interface Reservation {
@@ -147,7 +145,7 @@ const ReservasPage: React.FC = () => {
         const fetchedReservas: Reservation[] = Array.isArray(data) ? data : (data.data || []);
         console.log(`Reservas procesadas: ${JSON.stringify(fetchedReservas)}`);
 
-        setReservas(fetchedReservas);
+        setReservas(fetchedReservas.sort((a: Reservation, b: Reservation) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         setLoading(false);
       } catch (err) {
         console.log(`Error en fetchReservas: ${(err as Error).message}`);
@@ -241,108 +239,108 @@ const ReservasPage: React.FC = () => {
   };
 
   if (!user) {
-    return <div className="container mx-auto p-4 text-red-500">Por favor, inicia sesión.</div>;
+    return <div className="container mx-auto p-6 text-red-600 text-center">Inicia sesión.</div>;
   }
 
   if (loading) {
-    return <div className="container mx-auto p-4">Cargando...</div>;
+    return <div className="container mx-auto p-6 text-gray-600 text-center">Cargando...</div>;
   }
 
   if (error) {
-    return <div className="container mx-auto p-4 text-red-500">{error}</div>;
+    return <div className="container mx-auto p-6 text-red-600 text-center">{error}</div>;
   }
 
   return (
-    <div className="container mx-auto p-4">
-
-      <Link href="/" className="flex items-center gap-2">
-        <Image
-          src="/images/logo.png"
-          alt="Logo"
-          width={42}
-          height={42}
-          className="object-contain"
-        />
-        <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md ">
-          Maletalia
-        </span>
-        <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md">
-          .net
-        </span>
+    <div className="container mx-auto p-6 max-w-4xl">
+      <Link href="/" className="inline-flex items-center gap-3 mb-8">
+        <Image src="/images/logo.png" alt="Logo" width={36} height={36} className="object-contain" />
+        <span className="text-lg font-medium text-gray-900">Maletalia.net</span>
       </Link>
 
-
-      <h1 className="text-2xl font-bold mb-4">
-        {isOwner ? "Mis Reservas Recibidas" : "Mis Reservas"}
+      <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+        {isOwner ? "Reservas Recibidas" : "Mis Reservas"}
       </h1>
 
       {reservas.length === 0 ? (
-        <p>{isOwner ? "No tienes reservas recibidas." : "No has realizado ninguna reserva."}</p>
+        <p className="text-gray-500 text-center py-8">
+          {isOwner ? "No hay reservas recibidas." : "No tienes reservas."}
+        </p>
       ) : (
-        <div className="grid gap-4">
+        <div className="space-y-4">
           {reservas.map((reserva) => (
             <div
               key={reserva.id}
-              className="border p-4 rounded-lg shadow-md flex justify-between items-center"
+              className="flex justify-between items-center p-4 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition"
             >
-              <div>
-                <p>
+              <div className="text-sm text-gray-700 space-y-1">
+                <div>
                   <Link
                     href={`/detalle/${reserva.propiedad?.id || reserva.id}`}
-                    className="text-blue-500 hover:underline"
+                    className="text-blue-600 hover:underline font-medium"
                   >
                     {reserva.propiedad?.Titulo || reserva.propiedad?.attributes?.Titulo || "N/A"}
-                  </Link>{" "}
-                  - {isOwner ? (
-                    <>
-                      {reserva.usuario?.username || "N/A"} ({reserva.usuario?.email || "N/A"},{" "}
-                      {(reserva.usuario?.countryCode || "") + (reserva.usuario?.phone || "N/A")})
-                    </>
-                  ) : (
-                    reserva.usuario?.username || "N/A"
-                  )}{" "}
-                  - Reservado el: {moment(reserva.createdAt).format("YYYY-MM-DD")} - Desde:{" "}
-                  {moment(reserva.fechaInicio).format("YYYY-MM-DD")} Hasta:{" "}
-                  {moment(reserva.fechaFin).format("YYYY-MM-DD")} - Estado:{" "}
-                </p>
+                  </Link>
+                </div>
+                {isOwner && (
+                  <div className="text-gray-500">
+                    {reserva.usuario?.username || "N/A"} ({reserva.usuario?.email || "N/A"},{" "}
+                    {(reserva.usuario?.countryCode || "") + (reserva.usuario?.phone || "N/A")})
+                  </div>
+                )}
+                <div className="text-gray-500">
+                  Reservado: {moment(reserva.createdAt).format("DD/MM/YYYY")} · Desde:{" "}
+                  {moment(reserva.fechaInicio).format("DD/MM/YYYY")} · Hasta:{" "}
+                  {moment(reserva.fechaFin).format("DD/MM/YYYY")}
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 {isOwner ? (
                   editando[reserva.id] ? (
                     <>
                       <select
                         value={estadoCambios[reserva.id] || reserva.estado}
                         onChange={(e) => handleEstadoChange(reserva.id, e.target.value)}
-                        className="border rounded p-1"
+                        className="text-sm border-gray-200 rounded-md p-1.5 focus:ring-2 focus:ring-blue-200 outline-none"
                       >
                         <option value="pendiente">Pendiente</option>
                         <option value="confirmada">Confirmada</option>
                       </select>
                       <button
                         onClick={() => updateReservationStatus(reserva.id)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                        className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition"
                       >
-                        Grabar
+                        Guardar
                       </button>
                     </>
                   ) : (
                     <>
-                      <input
-                        type="text"
-                        value={reserva.estado || "N/A"}
-                        disabled
-                        className="border rounded p-1 bg-gray-200"
-                      />
+                      <span
+                        className={`text-sm capitalize px-2 py-1 rounded-full ${
+                          reserva.estado === "confirmada"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {reserva.estado || "N/A"}
+                      </span>
                       <button
                         onClick={() => toggleEditando(reserva.id)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                        className="text-sm text-blue-600 hover:text-blue-800"
                       >
                         Editar
                       </button>
                     </>
                   )
                 ) : (
-                  <span>{reserva.estado || "N/A"}</span>
+                  <span
+                    className={`text-sm capitalize px-2 py-1 rounded-full ${
+                      reserva.estado === "confirmada"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {reserva.estado || "N/A"}
+                  </span>
                 )}
               </div>
             </div>
