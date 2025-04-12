@@ -315,7 +315,7 @@ const ReservasPage: React.FC = () => {
       </div>
 
       {filteredReservas.length === 0 ? (
-        <p className="text-gray-800 text-center py-8">
+        <p className="text-gray-900 text-center py-8 font-medium">
           {isOwner ? "No hay reservas recibidas." : "No tienes reservas."}
         </p>
       ) : (
@@ -325,24 +325,24 @@ const ReservasPage: React.FC = () => {
             return (
               <div
                 key={reserva.id}
-                className={`flex justify-between items-center p-4 bg-white border border-gray-100 rounded-lg hover:bg-gray-50 transition ${isPast ? "opacity-60" : ""}`}
+                className="flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition"
               >
-                <div className="text-sm text-gray-700 space-y-1">
+                <div className="text-sm space-y-1">
                   <div>
                     <Link
                       href={`/detalle/${reserva.propiedad?.id || reserva.id}`}
-                      className="text-blue-600 hover:underline font-medium"
+                      className="text-blue-700 hover:underline font-semibold"
                     >
                       {reserva.propiedad?.Titulo || reserva.propiedad?.attributes?.Titulo || "N/A"}
                     </Link>
                   </div>
                   {isOwner && (
-                    <div className="text-gray-500">
+                    <div className="text-gray-600">
                       {reserva.usuario?.username || "N/A"} ({reserva.usuario?.email || "N/A"},{" "}
                       {(reserva.usuario?.countryCode || "") + (reserva.usuario?.phone || "N/A")})
                     </div>
                   )}
-                  <div className="text-gray-500">
+                  <div className="text-gray-600">
                     Reservado: {moment(reserva.createdAt).format("DD/MM/YYYY")} · Desde:{" "}
                     {moment(reserva.fechaInicio).format("DD/MM/YYYY")} · Hasta:{" "}
                     {moment(reserva.fechaFin).format("DD/MM/YYYY")}
@@ -355,7 +355,7 @@ const ReservasPage: React.FC = () => {
                         <select
                           value={estadoCambios[reserva.id] || reserva.estado}
                           onChange={(e) => handleEstadoChange(reserva.id, e.target.value)}
-                          className="text-sm border-gray-200 rounded-md p-1.5 focus:ring-2 focus:ring-blue-200 outline-none"
+                          className="text-sm border-gray-300 rounded-md p-1.5 focus:ring-2 focus:ring-blue-300 outline-none"
                         >
                           <option value="pendiente">Pendiente</option>
                           <option value="confirmada">Confirmada</option>
@@ -371,19 +371,19 @@ const ReservasPage: React.FC = () => {
                     ) : (
                       <>
                         <span
-                          className={`text-sm capitalize px-2 py-1 rounded-full ${
+                          className={`text-sm capitalize px-3 py-1 rounded-full font-medium ${
                             reserva.estado === "confirmada"
-                              ? "bg-green-100 text-green-700"
+                              ? "bg-green-100 text-green-800"
                               : reserva.estado === "completada"
-                              ? "bg-gray-100 text-gray-700"
-                              : "bg-yellow-100 text-yellow-700"
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-yellow-100 text-yellow-800"
                           }`}
                         >
                           {reserva.estado || "N/A"}
                         </span>
                         <button
                           onClick={() => toggleEditando(reserva.id)}
-                          className="text-sm text-blue-600 hover:text-blue-800"
+                          className="text-sm text-blue-700 hover:text-blue-900 font-medium"
                         >
                           Editar
                         </button>
@@ -391,12 +391,12 @@ const ReservasPage: React.FC = () => {
                     )
                   ) : (
                     <span
-                      className={`text-sm capitalize px-2 py-1 rounded-full ${
+                      className={`text-sm capitalize px-3 py-1 rounded-full font-medium ${
                         reserva.estado === "confirmada"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-100 text-green-800"
                           : reserva.estado === "completada"
-                          ? "bg-gray-100 text-gray-700"
-                          : "bg-yellow-100 text-yellow-700"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
                       {reserva.estado || "N/A"}
