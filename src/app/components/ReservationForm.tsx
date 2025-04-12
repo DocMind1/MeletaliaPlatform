@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
 import moment from "moment";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -40,7 +41,6 @@ interface Property {
   id: number;
   attributes: {
     users_permissions_user?: PropertyOwner;
-    // Otras propiedades de la propiedad...
   };
 }
 
@@ -53,15 +53,17 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
   isOwner,
   onClose,
   onSuccess,
-  occupiedDates = []
+  occupiedDates = [],
 }) => {
   const { user } = useAuth() as { user: AuthUser | null };
   const stripe = useStripe();
   const elements = useElements();
+  const router = useRouter();
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [paymentLoading, setPaymentLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -76,14 +78,15 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
   }, [startDate, endDate, pricePerNight]);
 
   const isDateOccupied = (date: moment.Moment) => {
-    return occupiedDates.some(occupiedDate => 
-      moment(occupiedDate).isSame(date, 'day')
+    return occupiedDates.some((occupiedDate) =>
+      moment(occupiedDate).isSame(date, "day")
     );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
 
     // Validaciones básicas
     if (!user) {
@@ -108,12 +111,20 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
     const availableUntilDate = moment(availableUntil);
 
     if (start.isBefore(availableFromDate)) {
-      setError(`La fecha de inicio no puede ser anterior a ${availableFromDate.format('DD/MM/YYYY')}`);
+      setError(
+        `La fecha de inicio no puede ser anterior a ${availableFromDate.format(
+          "DD/MM/YYYY"
+        )}`
+      );
       return;
     }
 
     if (end.isAfter(availableUntilDate)) {
-      setError(`La fecha de fin no puede ser posterior a ${availableUntilDate.format('DD/MM/YYYY')}`);
+      setError(
+        `La fecha de fin no puede ser posterior a ${availableUntilDate.format(
+          "DD/MM/YYYY"
+        )}`
+      );
       return;
     }
 
@@ -129,7 +140,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
         setError("Las fechas seleccionadas incluyen días ya reservados.");
         return;
       }
-      currentDate.add(1, 'day');
+      currentDate.add(1, "day");
     }
 
     if (!stripe || !elements) {
@@ -177,36 +188,48 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
       }
 
       // Crear reserva en Strapi
-      const reservaResponse = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.jwt}`,
-        },
-        body: JSON.stringify({
-          data: {
-            propiedad: propertyId,
-            fechaInicio: start.format("YYYY-MM-DD"),
-            fechaFin: end.format("YYYY-MM-DD"),
-            usuario: user.id,
-            estado: "pendiente",
-            paymentIntentId: paymentIntent?.id,
-            total,
+      const reservaResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/reservas`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.jwt}`,
           },
-        }),
-      });
+          body: JSON.stringify({
+            data: {
+              propiedad: propertyId,
+              fechaInicio: start.format("YYYY-MM-DD"),
+              fechaFin: end.format("YYYY-MM-DD"),
+              usuario: user.id,
+              estado: "pendiente",
+              paymentIntentId: paymentIntent?.id,
+              total,
+            },
+          }),
+        }
+      );
 
       if (!reservaResponse.ok) {
         const errorData = await reservaResponse.json();
         throw new Error(errorData.error?.message || "Error al crear la reserva");
       }
 
-      onSuccess();
-      onClose();
+      // Reserva creada exitosamente
+      console.log("Reserva creada con éxito");
+      setSuccessMessage("Reserva creada correctamente");
+      setTimeout(() => {
+        setSuccessMessage(null);
+        onSuccess();
+        onClose();
+        router.push("/reservas");
+      }, 2000);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Error al procesar la reserva";
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al procesar la reserva";
       setError(errorMessage);
       console.error("Error en reserva:", err);
+      setTimeout(() => setError(null), 5000);
     } finally {
       setPaymentLoading(false);
     }
@@ -216,10 +239,15 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
         <h2 className="text-xl font-bold mb-4 text-black">Reservar Propiedad</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {successMessage && (
+          <p className="mb-4 text-green-500 font-medium">{successMessage}</p>
+        )}
+        {error && <p className="mb-4 text-red-500">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Fecha de Inicio
+            </label>
             <input
               type="date"
               value={startDate}
@@ -231,11 +259,13 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Fecha de Fin</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Fecha de Fin
+            </label>
             <input
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => setEndDate(e.target.value)} // Corregido
               min={startDate || availableFrom}
               max={availableUntil}
               className="mt-1 block w-full border border-gray-300 rounded-md p-2"
@@ -247,11 +277,10 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
               Precio por noche: {pricePerNight} EUR
             </p>
             <p className="text-lg font-bold text-gray-900">
-              Total: {total} EUR ({moment(endDate).diff(moment(startDate), 'days')} noches)
+              Total: {total} EUR (
+              {moment(endDate).diff(moment(startDate), "days")} noches)
             </p>
-            <p className="text-xs text-gray-500">
-              Cancelación gratuita en 48 horas
-            </p>
+            <p className="text-xs text-gray-500">Cancelación gratuita en 48 horas</p>
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Tarjeta</label>
@@ -266,7 +295,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
                   },
                   invalid: { color: "#9e2146" },
                 },
-                hidePostalCode: true
+                hidePostalCode: true,
               }}
             />
           </div>
@@ -278,13 +307,31 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
             >
               {paymentLoading ? (
                 <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Procesando...
                 </span>
-              ) : "Pagar y Reservar"}
+              ) : (
+                "Pagar y Reservar"
+              )}
             </button>
             <button
               type="button"
