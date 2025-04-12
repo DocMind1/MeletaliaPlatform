@@ -98,7 +98,7 @@ interface Reservation {
 }
 
 export default function DetallePropiedad() {
-  
+
   const { user } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -114,9 +114,9 @@ export default function DetallePropiedad() {
     }
     return property.Imagenes && property.Imagenes.length > 0
       ? property.Imagenes.map((img: { url: string }) => ({
-          src: img.url,
-          alt: property.Titulo,
-        }))
+        src: img.url,
+        alt: property.Titulo,
+      }))
       : [{ src: "/images/placeholder.jpg", alt: property.Titulo }];
   }, [property]);
 
@@ -233,7 +233,7 @@ export default function DetallePropiedad() {
   console.log(occupiedDates);
 
   return (
-    <div className="max-w-6xl mx-auto pl-4 pr-4">
+    <div className="max-w-6xl mx-auto pl-4 pr-4 text-black">
       <Header />
       <h1 className="text-2xl font-bold mt-4  text-black ">{Titulo}</h1>
       <p className="text-sm text-black flex items-center gap-2 mt-2">
@@ -241,7 +241,7 @@ export default function DetallePropiedad() {
         {Direccion} | Disponible desde: {DisponibleDesde ? new Date(DisponibleDesde).toLocaleDateString() : "No especificado"} | Disponible hasta: {DisponibleHasta ? new Date(DisponibleHasta).toLocaleDateString() : "No especificado"}
       </p>
 
-      <div className="grid md:grid-cols-3 gap-4 mt-4">
+      <div className="grid md:grid-cols-1 gap-4 mt-4">
         <div className="md:col-span-2 relative">
           <Image
             src={images[currentIndex].src}
@@ -264,32 +264,14 @@ export default function DetallePropiedad() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="bg-white p-4 shadow-md rounded-lg">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18..."
-              width="100%"
-              height="200"
-              style={{ border: 0 }}
-              allowFullScreen={true}
-              loading="lazy"
-              className="rounded-lg"
-            ></iframe>
-          </div>
-          <div className="bg-white p-4 rounded-lg flex flex-col justify-between">
-            <div>
-              <h2 className="text-base font-semibold  text-black ">Precio</h2>
-              <p className="text-xl font-bold text-gray-800 mt-2">€ {Precio}</p>
-              <button
-                onClick={openModal}
-                className="bg-black text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-900 mt-4 w-full"
-              >
-                Reservar
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
+
+
+
+
+
+
+
 
       <div className="mt-6">
         <div className="bg-white p-4 rounded-lg">
@@ -303,6 +285,28 @@ export default function DetallePropiedad() {
           )}
         </div>
       </div>
+
+
+
+
+      <div className="flex flex-col gap-4">
+
+        <div className="bg-white p-4 rounded-lg flex flex-col justify-between">
+          <div>
+            <h2 className="text-base font-semibold  text-black ">Precio</h2>
+            <p className="text-xl font-bold text-gray-800 mt-2">€ {Precio}</p>
+            <button
+              onClick={openModal}
+              className="bg-black text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-900 mt-4 "
+            >
+              Reservar
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+
 
       <div className="mt-6">
         <div className="bg-white p-4 shadow-md rounded-lg">
@@ -509,7 +513,7 @@ export default function DetallePropiedad() {
       </div>
 
       {isModalOpen && (
-  <ReservationForm
+        <ReservationForm
           propertyId={propertyId}
           availableFrom={DisponibleDesde || ""}
           availableUntil={DisponibleHasta || ""}
@@ -518,8 +522,8 @@ export default function DetallePropiedad() {
           onClose={closeModal}
           onSuccess={handleReservationSuccess}
           occupiedDates={occupiedDates} // Pasar las fechas ocupadas
-          ownerStripeId={null}  />
-)}
+          ownerStripeId={null} />
+      )}
     </div>
   );
 }
