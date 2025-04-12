@@ -47,7 +47,7 @@ const FiltroBusquedaLinea: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-between bg-white p-3 rounded-lg shadow-md border ">
+    <div className="flex flex-wrap items-center justify-between bg-white px-3 py-2 rounded-lg shadow-md border">
       {/* Ubicación */}
       <div className="flex items-center space-x-1">
         <FaMapMarkerAlt className="text-gray-600" />
@@ -89,10 +89,10 @@ const FiltroBusquedaLinea: React.FC = () => {
 
       {/* Resultados */}
       {error && (
-        <div className="mt-4 text-red-500 text-center">{error}</div>
+        <div className="mt-2 text-red-500 text-center">{error}</div>
       )}
       {properties.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {properties.map((property) => (
             <div key={property.id} className="border rounded-md p-4 shadow-sm bg-white">
               <h3 className="text-lg font-semibold">{property.Titulo || "Sin título"}</h3>

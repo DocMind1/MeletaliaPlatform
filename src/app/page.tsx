@@ -19,10 +19,17 @@ export default function Home() {
       </section>
 
       {/* Lista de hoteles */}
+
       <section className="mt-8 md:mt-10">
         <HotelList />
+      </section>
+
+
+      <section className="mt-8 md:mt-10">
         <FiltroBusqueda/>
       </section>
+
+      
       <section className="mt-8 md:mt-10">
         <HotelCardList/>
       </section>
