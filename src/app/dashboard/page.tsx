@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -188,7 +189,6 @@ export default function Dashboard() {
       const propertiesWithDesayunoObj = result.properties.map((prop: Property) => ({
         ...prop,
         Desayuno: {
-          // Aseguramos que includes se use solo si Desayuno es array
           Continental: Array.isArray(prop.Desayuno) && prop.Desayuno.includes("Continental") || false,
           Vegetariano: Array.isArray(prop.Desayuno) && prop.Desayuno.includes("Vegetariano") || false,
           Vegano: Array.isArray(prop.Desayuno) && prop.Desayuno.includes("Vegano") || false,
@@ -204,13 +204,6 @@ export default function Dashboard() {
     }
     setIsLoadingProperties(false);
   };
-
-
-
-
-
-
-
 
   useEffect(() => {
     if (jwt && userId) {
@@ -228,38 +221,32 @@ export default function Dashboard() {
     }
   }, [mensaje]);
 
-
-
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked; // Cambiamos '_' por 'checked'
+      const checked = (e.target as HTMLInputElement).checked;
       if (name in formData.Servicios) {
         setFormData({
           ...formData,
-          Servicios: { ...formData.Servicios, [name]: checked }, // Usamos 'checked'
+          Servicios: { ...formData.Servicios, [name]: checked },
         });
       } else if (name in formData.Caracteristicas) {
         setFormData({
           ...formData,
-          Caracteristicas: { ...formData.Caracteristicas, [name]: checked }, // Usamos 'checked'
+          Caracteristicas: { ...formData.Caracteristicas, [name]: checked },
         });
       } else if (name in formData.Desayuno) {
         setFormData({
           ...formData,
-          Desayuno: { ...formData.Desayuno, [name]: checked }, // Usamos 'checked'
+          Desayuno: { ...formData.Desayuno, [name]: checked },
         });
       }
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
-
-
-
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -278,10 +265,10 @@ export default function Dashboard() {
     e.preventDefault();
     setLoading(true);
     setMensaje("");
-  
+
     try {
       let imageIds: number[] | undefined;
-  
+
       if (formData.imagenes) {
         const uploadResult = await uploadDashboardImages(
           Array.from(formData.imagenes),
@@ -296,12 +283,11 @@ export default function Dashboard() {
           return;
         }
       }
-  
-      // Convertir Desayuno de objeto booleano a array de strings
+
       const desayunoArray = Object.entries(formData.Desayuno)
-        .filter(([, value]) => value) // Corrección: omitimos nombrar la clave
+        .filter(([, value]) => value)
         .map(([key]) => (key === "SinGluten" ? "Sin Gluten" : key));
-  
+
       const propertyData = {
         Titulo: formData.Titulo,
         Descripcion: formData.Descripcion,
@@ -328,15 +314,15 @@ export default function Dashboard() {
         users_permissions_user: userId,
         Imagenes: imageIds,
         Servicios: formData.Servicios,
-        Desayuno: desayunoArray, // Enviar como string[]
+        Desayuno: desayunoArray,
         Caracteristicas: formData.Caracteristicas,
         PuntosFuertes: formData.PuntosFuertes,
       };
-  
+
       const result = editingProperty
         ? await updateProperty(editingProperty.id, propertyData, jwt)
         : await createProperty(propertyData, jwt);
-  
+
       if (result.ok) {
         setMensaje(
           editingProperty
@@ -371,6 +357,81 @@ export default function Dashboard() {
     }
   };
 
+  const handleCloseModal = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Cierra el modal solo si el clic es en el fondo (no en el contenido del modal)
+    if (e.target === e.currentTarget) {
+      setShowModal(false);
+      setEditingProperty(null);
+      setFormData({
+        Titulo: "",
+        Descripcion: "",
+        Precio: "",
+        Direccion: "",
+        Pais: "España",
+        ComunidadAutonoma: "",
+        Ciudad: "",
+        Numerodehabitaciones: "",
+        Numerodebanos: "",
+        publishedAt: "",
+        imagenes: null,
+        Servicios: {
+          WiFi: false,
+          Parking: false,
+          AdaptadoMovilidadReducida: false,
+          Piscina: false,
+          Gimnasio: false,
+          Spa: false,
+          Restaurante: false,
+          Bar: false,
+          Lavanderia: false,
+          Recepcion24h: false,
+          TransporteAeropuerto: false,
+          ServicioHabitaciones: false,
+          AdmiteMascotas: false,
+          ZonasFumadores: false,
+          AireAcondicionadoComun: false,
+          CalefaccionComun: false,
+          SalaConferencias: false,
+          AreaJuegosInfantiles: false,
+          Biblioteca: false,
+          Jardin: false,
+        },
+        Desayuno: {
+          Continental: false,
+          Vegetariano: false,
+          Vegano: false,
+          SinGluten: false,
+          Buffet: false,
+        },
+        Caracteristicas: {
+          Terraza: false,
+          VistasPanoramicas: false,
+          AireAcondicionado: false,
+          Calefaccion: false,
+          Minibar: false,
+          TVPantallaPlana: false,
+          CajaFuerte: false,
+          Escritorio: false,
+          Banera: false,
+          Ducha: false,
+          SecadorPelo: false,
+          ArticulosAseo: false,
+          Armario: false,
+          Insonorizacion: false,
+          Cafetera: false,
+          HervidorElectrico: false,
+          Microondas: false,
+          Nevera: false,
+          CamaExtraGrande: false,
+          ServicioStreaming: false,
+        },
+        PuntosFuertes: "",
+        DisponibleDesde: "",
+        DisponibleHasta: "",
+      });
+    }
+  };
+
   if (!user || user.role?.id !== 3) {
     return (
       <div className="max-w-2xl mx-auto p-6">
@@ -383,7 +444,6 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto p-4">
-
       <Link href="/" className="flex items-center gap-2">
         <Image
           src="/images/logo.png"
@@ -392,7 +452,7 @@ export default function Dashboard() {
           height={42}
           className="object-contain"
         />
-        <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md ">
+        <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md">
           Maletalia
         </span>
         <span className="text-2xl text-gray-700 font-bold border border-black shadow-md md:border-0 md:shadow-none drop-shadow-md">
@@ -403,15 +463,22 @@ export default function Dashboard() {
       <main className="max-w-6xl mx-auto pt-24 pb-6 px-6">
         {mensaje && (
           <div
-            className={`fixed top-20 right-6 px-6 py-3 rounded-md shadow-lg text-white transition-opacity duration-300 ${mensajeType === "success" ? "bg-green-500" : "bg-red-500"
-              }`}
+            className={`fixed top-20 right-6 px-6 py-3 rounded-md shadow-lg text-white transition-opacity duration-300 ${
+              mensajeType === "success" ? "bg-green-500" : "bg-red-500"
+            }`}
           >
             {mensaje}
           </div>
         )}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4 text-black"
+            onClick={handleCloseModal}
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()} // Evita que los clics dentro del modal lo cierren
+            >
               <h2 className="text-2xl font-semibold mb-4">
                 {editingProperty ? "Editar Propiedad" : "Crear Propiedad"}
               </h2>
@@ -661,18 +728,20 @@ export default function Dashboard() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`flex-1 py-2 rounded-md flex justify-center items-center ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-                      } text-white transition duration-200`}
+                    className={`flex-1 py-2 rounded-md flex justify-center items-center ${
+                      loading ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                    } text-white transition duration-200`}
                   >
                     {loading
                       ? "Guardando..."
                       : editingProperty
-                        ? "Actualizar Propiedad"
-                        : "Crear Propiedad"}
+                      ? "Actualizar Propiedad"
+                      : "Crear Propiedad"}
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
-                      setShowModal(true);
+                      setShowModal(false);
                       setEditingProperty(null);
                       setFormData({
                         Titulo: "",
@@ -742,22 +811,17 @@ export default function Dashboard() {
                         DisponibleHasta: "",
                       });
                     }}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
+                    className="flex-1 py-2 rounded-md bg-gray-300 text-gray-700 hover:bg-gray-400 transition duration-200"
                   >
-                    Crear Nueva Propiedad
+                    Cancelar
                   </button>
                 </div>
               </form>
             </div>
           </div>
         )}
-
-
         <div className="mt-8">
-
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-
-
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">Mis Propiedades</h2>
             <button
               onClick={() => {

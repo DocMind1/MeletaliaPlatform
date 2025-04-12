@@ -304,6 +304,12 @@ const ReservasPage: React.FC = () => {
         >
           Confirmadas
         </button>
+        <button
+          onClick={() => setFiltroEstado("cancelada")}
+          className={`text-sm px-4 py-2 rounded-md ${filtroEstado === "cancelada" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Canceladas
+        </button>
         {isOwner && (
           <button
             onClick={() => setFiltroEstado("completada")}
@@ -359,6 +365,7 @@ const ReservasPage: React.FC = () => {
                         >
                           <option value="pendiente">Pendiente</option>
                           <option value="confirmada">Confirmada</option>
+                          <option value="cancelada">Cancelada</option>
                           <option value="completada">Completada</option>
                         </select>
                         <button
@@ -376,6 +383,8 @@ const ReservasPage: React.FC = () => {
                               ? "bg-green-100 text-green-800"
                               : reserva.estado === "completada"
                               ? "bg-gray-100 text-gray-800"
+                              : reserva.estado === "cancelada"
+                              ? "bg-red-100 text-red-800"
                               : "bg-yellow-100 text-yellow-800"
                           }`}
                         >
@@ -396,6 +405,8 @@ const ReservasPage: React.FC = () => {
                           ? "bg-green-100 text-green-800"
                           : reserva.estado === "completada"
                           ? "bg-gray-100 text-gray-800"
+                          : reserva.estado === "cancelada"
+                          ? "bg-red-100 text-red-800"
                           : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
