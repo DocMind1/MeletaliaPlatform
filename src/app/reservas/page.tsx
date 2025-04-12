@@ -315,7 +315,7 @@ const ReservasPage: React.FC = () => {
       </div>
 
       {filteredReservas.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">
+        <p className="text-gray-800 text-center py-8">
           {isOwner ? "No hay reservas recibidas." : "No tienes reservas."}
         </p>
       ) : (

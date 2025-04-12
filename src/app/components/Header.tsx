@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { UserCircle } from "lucide-react";
-import { useAuth } from "../context/AuthContext"; // Ajusta la ruta según tu estructura
+import { useAuth } from "../context/AuthContext";
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user, setUser } = useAuth(); // Usar useAuth para obtener el usuario autenticado
+  const { user, setUser } = useAuth();
 
   const handleLogout = () => {
     localStorage.removeItem("userSession");
     setUser(null);
-    window.location.href = "/"; // Redirige al inicio tras cerrar sesión
+    window.location.href = "/";
   };
 
   return (
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
         minHeight: "455px",
       }}
     >
-      <div className="absolute top-0 left-0 w-full px-6 py-4 z-10 pt-[60px] pl-[60px]  pr-[60px] ">
+      <div className="absolute top-0 left-0 w-full px-6 py-4 z-10 pt-[60px] pl-[60px] pr-[60px]">
         <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image
@@ -54,28 +54,60 @@ const Header: React.FC = () => {
                   <span>MENU</span>
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 bg-white text-blue-900 rounded shadow-lg">
+                  <div className="absolute right-0 mt-2 w-48 bg-white text-blue-900 rounded-lg shadow-lg z-20">
                     <ul className="flex flex-col">
-                      <li className="px-4 py-2 hover:bg-gray-100">
-                        <Link href="/perfil">Perfil</Link>
+                      <li>
+                        <Link
+                          href="/perfil"
+                          className="block px-4 py-2 text-sm hover:bg-gray-100 rounded-t-lg"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          Perfil
+                        </Link>
                       </li>
                       {user.role?.id === 3 && (
                         <>
-                          <li className="px-4 py-2 hover:bg-gray-100">
-                            <Link href="/dashboard">Dashboard</Link>
+                          <li>
+                            <Link
+                              href="/dashboard"
+                              className="block px-4 py-2 text-sm hover:bg-gray-100"
+                              onClick={() => setMenuOpen(false)}
+                            >
+                              Mis propiedades
+                            </Link>
                           </li>
-                          <li className="px-4 py-2 hover:bg-gray-100">
-                            <Link href="/reservas">Mis   Reservas Recibidas</Link>
+                          <li>
+                            <Link
+                              href="/reservas"
+                              className="block px-4 py-2 text-sm hover:bg-gray-100"
+                              onClick={() => setMenuOpen(false)}
+                            >
+                              Mis Reservas Recibidas
+                            </Link>
                           </li>
                         </>
                       )}
                       {user.role?.id === 4 && (
-                        <li className="px-4 py-2 hover:bg-gray-100">
-                          <Link href="/reservas">Mis Reservas</Link>
+                        <li>
+                          <Link
+                            href="/reservas"
+                            className="block px-4 py-2 text-sm hover:bg-gray-100"
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            Mis Reservas
+                          </Link>
                         </li>
                       )}
-                      <li className="px-4 py-2 hover:bg-gray-100">
-                        <button onClick={handleLogout}>Cerrar sesión</button>
+                      <li>
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setMenuOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded-b-lg"
+                        >
+                          Cerrar sesión
+                        </button>
                       </li>
                     </ul>
                   </div>
