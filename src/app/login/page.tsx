@@ -91,7 +91,7 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
+    <div className="max-w-md mx-auto p-6 text-black">
       <h1 className="text-2xl font-bold mb-6">Iniciar Sesión</h1>
       <form
         onSubmit={handleSubmit}

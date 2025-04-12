@@ -262,7 +262,7 @@ const ReservasPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-4xl text-black">
       <Link href="/" className="inline-flex items-center gap-3 mb-8">
         <Image src="/images/logo.png" alt="Logo" width={36} height={36} className="object-contain" />
         <span className="text-lg font-medium text-gray-900">Maletalia.net</span>
