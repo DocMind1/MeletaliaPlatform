@@ -1,30 +1,53 @@
 "use client";
+
 import React, { useState } from "react";
-import { FaMapMarkerAlt, FaDollarSign, FaHome, FaBed, FaBath, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { FaMapMarkerAlt, FaDollarSign } from "react-icons/fa";
+import { searchProperties, SearchPropertyFilters } from "../../../userService/userService";
+
+// Interfaz para las propiedades
+interface Property {
+  id: number;
+  Titulo: string;
+  Descripcion: string;
+  Precio: number;
+  Direccion: string;
+  Ciudad: string;
+  Imagenes: { url: string }[] | null;
+}
 
 const FiltroBusquedaLinea: React.FC = () => {
   const [location, setLocation] = useState("");
   const [minPrice, setMinPrice] = useState<number | "">("");
   const [maxPrice, setMaxPrice] = useState<number | "">("");
-  const [propertyType, setPropertyType] = useState("");
-  const [rooms, setRooms] = useState(1);
-  const [bathrooms, setBathrooms] = useState(1);
-  const [availability, setAvailability] = useState(false);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFilter = () => {
-    console.log({
-      location,
-      minPrice,
-      maxPrice,
-      propertyType,
-      rooms,
-      bathrooms,
-      availability,
-    });
+  const handleFilter = async () => {
+    setLoading(true);
+    setError(null);
+    setProperties([]);
+
+    const filters: SearchPropertyFilters = {
+      city: location || undefined,
+      minPrice: minPrice !== "" ? Number(minPrice) : undefined,
+      maxPrice: maxPrice !== "" ? Number(maxPrice) : undefined,
+    };
+
+    console.log("Buscando con filtros:", filters);
+
+    const result = await searchProperties(filters);
+    setLoading(false);
+
+    if (result.ok) {
+      setProperties(result.properties);
+    } else {
+      setError(result.error ?? "Error al buscar propiedades");
+    }
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-between bg-white p-3 rounded-lg shadow-md border space-x-2">
+    <div className="flex flex-wrap items-center justify-between bg-white p-3 rounded-lg shadow-md border ">
       {/* Ubicación */}
       <div className="flex items-center space-x-1">
         <FaMapMarkerAlt className="text-gray-600" />
@@ -55,69 +78,42 @@ const FiltroBusquedaLinea: React.FC = () => {
           className="w-16 outline-none p-1 border-b border-gray-300 focus:border-blue-600"
         />
       </div>
-      {/* Tipo de propiedad */}
-      <div className="flex items-center space-x-1">
-        <FaHome className="text-gray-600" />
-        <select
-          value={propertyType}
-          onChange={(e) => setPropertyType(e.target.value)}
-          className="outline-none p-1 border-b border-gray-300 focus:border-blue-600"
-        >
-          <option value="">Tipo</option>
-          <option value="casa">Casa</option>
-          <option value="apartamento">Apartamento</option>
-          <option value="local_comercial">Local Comercial</option>
-          <option value="otro">Otro</option>
-        </select>
-      </div>
-      {/* Habitaciones */}
-      <div className="flex items-center space-x-1">
-        <FaBed className="text-gray-600" />
-        <select
-          value={rooms}
-          onChange={(e) => setRooms(Number(e.target.value))}
-          className="outline-none p-1 border-b border-gray-300 focus:border-blue-600"
-        >
-          {[...Array(10).keys()].map((n) => (
-            <option key={n} value={n + 1}>{n + 1}</option>
-          ))}
-        </select>
-      </div>
-      {/* Baños */}
-      <div className="flex items-center space-x-1">
-        <FaBath className="text-gray-600" />
-        <select
-          value={bathrooms}
-          onChange={(e) => setBathrooms(Number(e.target.value))}
-          className="outline-none p-1 border-b border-gray-300 focus:border-blue-600"
-        >
-          {[...Array(10).keys()].map((n) => (
-            <option key={n} value={n + 1}>{n + 1}</option>
-          ))}
-        </select>
-      </div>
-      {/* Disponibilidad */}
-      <div className="flex items-center space-x-1">
-        {availability ? (
-          <FaToggleOn
-            className="text-green-600 cursor-pointer"
-            onClick={() => setAvailability(!availability)}
-          />
-        ) : (
-          <FaToggleOff
-            className="text-gray-600 cursor-pointer"
-            onClick={() => setAvailability(!availability)}
-          />
-        )}
-        <span className="text-sm text-gray-600">Disponible</span>
-      </div>
       {/* Botón Filtrar */}
       <button
         onClick={handleFilter}
-        className="bg-black text-white px-4 py-2 rounded-md hover:bg-black transition"
+        className="bg-black text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+        disabled={loading}
       >
-        Filtrar
+        {loading ? "Filtrando..." : "Filtrar"}
       </button>
+
+      {/* Resultados */}
+      {error && (
+        <div className="mt-4 text-red-500 text-center">{error}</div>
+      )}
+      {properties.length > 0 && (
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {properties.map((property) => (
+            <div key={property.id} className="border rounded-md p-4 shadow-sm bg-white">
+              <h3 className="text-lg font-semibold">{property.Titulo || "Sin título"}</h3>
+              <p className="text-gray-600">{property.Descripcion || "Sin descripción"}</p>
+              <p className="text-blue-600 font-bold">
+                {property.Precio ? `${property.Precio} €` : "Precio no disponible"}
+              </p>
+              <p>{property.Direccion || "Dirección no disponible"}</p>
+              {property.Imagenes && property.Imagenes.length > 0 ? (
+                <img
+                  src={`${property.Imagenes[0].url}`}
+                  alt={property.Titulo || "Imagen"}
+                  className="w-full h-40 object-cover mt-2 rounded-md"
+                />
+              ) : (
+                <p className="text-gray-500 mt-2">Sin imagen</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
