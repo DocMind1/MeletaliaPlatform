@@ -222,7 +222,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
         setSuccessMessage(null);
         onSuccess();
         onClose();
-        router.push("/reservas");
+        router.push("/");
       }, 2000);
     } catch (err: unknown) {
       const errorMessage =

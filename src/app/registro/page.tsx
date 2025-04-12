@@ -218,7 +218,7 @@ export default function Registro() {
     `mt-1 block w-full border rounded-md p-2 ${errors[field] ? "border-red-500" : "border-gray-300"}`;
 
   return (
-    <div className="max-w-lg mx-auto p-6">
+    <div className="max-w-lg mx-auto p-6 text-black">
       <h1 className="text-2xl font-bold mb-6">Registro de Usuario</h1>
       {!isStepOneComplete ? (
         <form
