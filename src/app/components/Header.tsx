@@ -56,15 +56,7 @@ const Header: React.FC = () => {
                 {menuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white text-blue-900 rounded-lg shadow-lg z-20">
                     <ul className="flex flex-col">
-                      <li>
-                        <Link
-                          href="/perfil"
-                          className="block px-4 py-2 text-sm hover:bg-gray-100 rounded-t-lg"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          Perfil
-                        </Link>
-                      </li>
+              
                       {user.role?.id === 3 && (
                         <>
                           <li>
